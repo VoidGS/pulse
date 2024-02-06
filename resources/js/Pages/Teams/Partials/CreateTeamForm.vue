@@ -21,16 +21,16 @@ const createTeam = () => {
 <template>
     <FormSection @submitted="createTeam">
         <template #title>
-            Team Details
+            Detalhes do setor
         </template>
 
         <template #description>
-            Create a new team to collaborate with others on projects.
+			Crie um novo setor para colaborar com os outros usuários.
         </template>
 
         <template #form>
             <div class="col-span-6">
-                <InputLabel value="Team Owner" />
+                <InputLabel value="Responsável do setor" />
 
                 <div class="flex items-center mt-2">
                     <img class="object-cover w-12 h-12 rounded-full" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
@@ -45,7 +45,7 @@ const createTeam = () => {
             </div>
 
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="name" value="Team Name" />
+                <InputLabel for="name" value="Nome do setor" />
                 <TextInput
                     id="name"
                     v-model="form.name"
@@ -59,7 +59,7 @@ const createTeam = () => {
 
         <template #actions>
             <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                Create
+                Criar
             </PrimaryButton>
         </template>
     </FormSection>

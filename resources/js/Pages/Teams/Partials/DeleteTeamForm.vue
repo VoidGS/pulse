@@ -27,37 +27,37 @@ const deleteTeam = () => {
 <template>
     <ActionSection>
         <template #title>
-            Delete Team
+            Remover setor
         </template>
 
         <template #description>
-            Permanently delete this team.
+			Apague permanentemente este setor.
         </template>
 
         <template #content>
             <div class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
-                Once a team is deleted, all of its resources and data will be permanently deleted. Before deleting this team, please download any data or information regarding this team that you wish to retain.
+				Quando um setor é removido, todos os seus dados serão perdidos. Apenas setores sem <strong>serviços</strong> ativos vinculados podem ser removidos.
             </div>
 
             <div class="mt-5">
                 <DangerButton @click="confirmTeamDeletion">
-                    Delete Team
+                    Remover setor
                 </DangerButton>
             </div>
 
             <!-- Delete Team Confirmation Modal -->
             <ConfirmationModal :show="confirmingTeamDeletion" @close="confirmingTeamDeletion = false">
                 <template #title>
-                    Delete Team
+                    Remover setor
                 </template>
 
                 <template #content>
-                    Are you sure you want to delete this team? Once a team is deleted, all of its resources and data will be permanently deleted.
+					Você tem certeza que deseja remover esse setor? Quando um setor é removido, todos os seus dados serão perdidos.
                 </template>
 
                 <template #footer>
                     <SecondaryButton @click="confirmingTeamDeletion = false">
-                        Cancel
+                        Cancelar
                     </SecondaryButton>
 
                     <DangerButton
@@ -66,7 +66,7 @@ const deleteTeam = () => {
                         :disabled="form.processing"
                         @click="deleteTeam"
                     >
-                        Delete Team
+                        Remover setor
                     </DangerButton>
                 </template>
             </ConfirmationModal>

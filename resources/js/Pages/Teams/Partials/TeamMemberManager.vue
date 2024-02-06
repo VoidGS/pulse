@@ -100,17 +100,17 @@ const displayableRole = (role) => {
             <!-- Add Team Member -->
             <FormSection @submitted="addTeamMember">
                 <template #title>
-                    Add Team Member
+                    Adicionar membro ao setor
                 </template>
 
                 <template #description>
-                    Add a new team member to your team, allowing them to collaborate with you.
+					Adicione um membro ao setor, permitindo que ele colabore com você.
                 </template>
 
                 <template #form>
                     <div class="col-span-6">
                         <div class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
-                            Please provide the email address of the person you would like to add to this team.
+							Insira o endereço de email da pessoa que você deseja adicionar ao setor.
                         </div>
                     </div>
 
@@ -128,7 +128,7 @@ const displayableRole = (role) => {
 
                     <!-- Role -->
                     <div v-if="availableRoles.length > 0" class="col-span-6 lg:col-span-4">
-                        <InputLabel for="roles" value="Role" />
+                        <InputLabel for="roles" value="Cargo" />
                         <InputError :message="addTeamMemberForm.errors.role" class="mt-2" />
 
                         <div class="relative z-0 mt-1 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer">
@@ -164,11 +164,11 @@ const displayableRole = (role) => {
 
                 <template #actions>
                     <ActionMessage :on="addTeamMemberForm.recentlySuccessful" class="me-3">
-                        Added.
+                        Adicionado
                     </ActionMessage>
 
                     <PrimaryButton :class="{ 'opacity-25': addTeamMemberForm.processing }" :disabled="addTeamMemberForm.processing">
-                        Add
+                        Adicionar
                     </PrimaryButton>
                 </template>
             </FormSection>
@@ -180,11 +180,11 @@ const displayableRole = (role) => {
             <!-- Team Member Invitations -->
             <ActionSection class="mt-10 sm:mt-0">
                 <template #title>
-                    Pending Team Invitations
+					Convites pendentes
                 </template>
 
                 <template #description>
-                    These people have been invited to your team and have been sent an invitation email. They may join the team by accepting the email invitation.
+					Essas pessoas foram convidadas para seu setor e receberam um email de convite. Elas podem entrar no seu setor aceitando o convite no email.
                 </template>
 
                 <!-- Pending Team Member Invitation List -->
@@ -202,7 +202,7 @@ const displayableRole = (role) => {
                                     class="cursor-pointer ms-6 text-sm text-red-500 focus:outline-none"
                                     @click="cancelTeamInvitation(invitation)"
                                 >
-                                    Cancel
+                                    Cancelar
                                 </button>
                             </div>
                         </div>
@@ -217,11 +217,11 @@ const displayableRole = (role) => {
             <!-- Manage Team Members -->
             <ActionSection class="mt-10 sm:mt-0">
                 <template #title>
-                    Team Members
+                    Membros do setor
                 </template>
 
                 <template #description>
-                    All of the people that are part of this team.
+					Essas pessoas fazem parte desse setor.
                 </template>
 
                 <!-- Team Member List -->
@@ -255,7 +255,7 @@ const displayableRole = (role) => {
                                     class="cursor-pointer ms-6 text-sm text-red-500"
                                     @click="confirmLeavingTeam"
                                 >
-                                    Leave
+                                    Sair
                                 </button>
 
                                 <!-- Remove Team Member -->
@@ -264,7 +264,7 @@ const displayableRole = (role) => {
                                     class="cursor-pointer ms-6 text-sm text-red-500"
                                     @click="confirmTeamMemberRemoval(user)"
                                 >
-                                    Remove
+                                    Remover
                                 </button>
                             </div>
                         </div>
@@ -276,7 +276,7 @@ const displayableRole = (role) => {
         <!-- Role Management Modal -->
         <DialogModal :show="currentlyManagingRole" @close="currentlyManagingRole = false">
             <template #title>
-                Manage Role
+                Gerenciar cargo
             </template>
 
             <template #content>
@@ -314,7 +314,7 @@ const displayableRole = (role) => {
 
             <template #footer>
                 <SecondaryButton @click="currentlyManagingRole = false">
-                    Cancel
+                    Cancelar
                 </SecondaryButton>
 
                 <PrimaryButton
@@ -323,7 +323,7 @@ const displayableRole = (role) => {
                     :disabled="updateRoleForm.processing"
                     @click="updateRole"
                 >
-                    Save
+                    Salvar
                 </PrimaryButton>
             </template>
         </DialogModal>
@@ -331,16 +331,16 @@ const displayableRole = (role) => {
         <!-- Leave Team Confirmation Modal -->
         <ConfirmationModal :show="confirmingLeavingTeam" @close="confirmingLeavingTeam = false">
             <template #title>
-                Leave Team
+                Sair do setor
             </template>
 
             <template #content>
-                Are you sure you would like to leave this team?
+				Você tem certeza que deseja sair desse setor?
             </template>
 
             <template #footer>
                 <SecondaryButton @click="confirmingLeavingTeam = false">
-                    Cancel
+                    Cancelar
                 </SecondaryButton>
 
                 <DangerButton
@@ -349,7 +349,7 @@ const displayableRole = (role) => {
                     :disabled="leaveTeamForm.processing"
                     @click="leaveTeam"
                 >
-                    Leave
+                    Sair
                 </DangerButton>
             </template>
         </ConfirmationModal>
@@ -357,16 +357,16 @@ const displayableRole = (role) => {
         <!-- Remove Team Member Confirmation Modal -->
         <ConfirmationModal :show="teamMemberBeingRemoved" @close="teamMemberBeingRemoved = null">
             <template #title>
-                Remove Team Member
+                Remover membro do setor
             </template>
 
             <template #content>
-                Are you sure you would like to remove this person from the team?
+				Você tem certeza que deseja remover esse membro do setor?
             </template>
 
             <template #footer>
                 <SecondaryButton @click="teamMemberBeingRemoved = null">
-                    Cancel
+                    Cancelar
                 </SecondaryButton>
 
                 <DangerButton
@@ -375,7 +375,7 @@ const displayableRole = (role) => {
                     :disabled="removeTeamMemberForm.processing"
                     @click="removeTeamMember"
                 >
-                    Remove
+                    Remover
                 </DangerButton>
             </template>
         </ConfirmationModal>
