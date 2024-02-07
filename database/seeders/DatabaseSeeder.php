@@ -24,5 +24,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'voidgs',
             'email' => 'void@test.com'
         ]);
+
+        User::factory(20)->create();
     }
 }
