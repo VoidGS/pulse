@@ -58,5 +58,9 @@ class JetstreamServiceProvider extends ServiceProvider
             'create',
             'update',
         ])->description('Editores podem ler, criar e atualizar.');
+
+        Jetstream::role('member', 'Membro', [
+            'read',
+        ])->description('Membros só podem ler.');
     }
 }
