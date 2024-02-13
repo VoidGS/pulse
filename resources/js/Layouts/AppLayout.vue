@@ -7,6 +7,8 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import Container from '@/Components/Container.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
 
 defineProps({
 	title: String,
@@ -33,7 +35,7 @@ const logout = () => {
 
 		<Banner/>
 
-		<div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+		<div class="min-h-screen dark:bg-gray-900">
 			<nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
 				<!-- Primary Navigation Menu -->
 				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -351,7 +353,10 @@ const logout = () => {
 
 			<!-- Page Content -->
 			<main>
-				<slot/>
+				<Container>
+					<Breadcrumb class="" />
+					<slot/>
+				</Container>
 			</main>
 		</div>
 	</div>
