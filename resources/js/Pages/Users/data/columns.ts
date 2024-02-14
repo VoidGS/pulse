@@ -1,4 +1,3 @@
-// TODO: Fix DataTable import with index.ts
 // @ts-ignore
 import DropdownAction from "@/Components/DataTable/DataTableDropdown.vue";
 // @ts-ignore

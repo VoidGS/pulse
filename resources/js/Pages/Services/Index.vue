@@ -1,52 +1,50 @@
 <script lang="ts" setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
-import { route } from "momentum-trail";
+
+import AppLayout from "@/Layouts/AppLayout.vue";
+import PageContainer from "@/Components/PageContainer.vue";
 import { Button } from "@/Components/ui/button";
 import { Plus } from "lucide-vue-next";
-import { ref, onMounted, computed } from "vue";
-import { columns } from "@/Pages/Users/data/columns";
-import { columnsView, type User } from "@/Pages/Users/data/schema";
+import { columns } from "@/Pages/Services/data/columns";
+import { columnsView } from "@/Pages/Services/data/schema";
 import DataTable from "@/Components/DataTable/DataTable.vue";
-import PageContainer from "@/Components/PageContainer.vue";
+import { onMounted, ref } from "vue";
+import type { User } from "@/Pages/Users/data/schema";
 
-const props = defineProps(['users']);
+const props = defineProps(['services'])
 
 const data = ref<User[]>([])
 
 async function getData(): Promise<User[]> {
-	return props.users
+	return props.services
 }
 
 onMounted(async () => {
 	data.value = await getData();
 })
-
-const createUserRoute = route('users.create');
-const canCreateUser = computed(() => props.users[0].can?.create)
 </script>
+
 <template>
-	<AppLayout title="Usuários">
+	<AppLayout title="Serviços">
 		<PageContainer>
 			<div>
-				<img src="/emojis/open-file-folder.png" class="w-10 h-10 mb-6" alt="Emoji pasta aberta">
-				<!--<FolderOpen class="w-10 h-10 mb-6" />-->
+				<img src="/emojis/briefcase.png" class="w-10 h-10 mb-6" alt="Emoji de maleta">
 
 				<div class="flex items-center justify-between">
 					<div>
 						<h2 class="text-2xl font-bold tracking-tight">
-							Usuários
+							Serviços
 						</h2>
 
 						<p class="text-muted-foreground">
-							Listagem de usuários.
+							Listagem de serviços.
 						</p>
 					</div>
 
-					<div v-if="canCreateUser">
+					<div>
 						<Button as-child>
-							<a :href="createUserRoute">
+							<a>
 								<Plus class="w-5 h-5 mr-2"/>
-								Cadastrar usuário
+								Cadastrar serviço
 							</a>
 						</Button>
 					</div>

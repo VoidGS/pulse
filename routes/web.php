@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Foundation\Application;
@@ -38,4 +39,6 @@ Route::middleware([
     })->name('dashboard');
 
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'update']);
+
+    Route::resource('services', ServiceController::class)->only(['index']);
 });

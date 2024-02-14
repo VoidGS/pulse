@@ -1,4 +1,4 @@
-<script lang="ts" setup generic="TData, TValue">
+<script lang="ts" setup>
 import type { ColumnDef, SortingState, ColumnFiltersState, VisibilityState } from "@tanstack/vue-table";
 import { valueUpdater } from "@/lib/utils";
 import {
@@ -16,8 +16,8 @@ import DataTableViewOptions, { type ViewColumnsOptions } from "@/Components/Data
 import DataTableFilter from "@/Components/DataTable/DataTableFilter.vue";
 
 const props = defineProps<{
-	columns: ColumnDef<TData, TValue>[]
-	data: TData[]
+	columns: ColumnDef<any>[]
+	data: [{}]
 	filterColumn?: {
 		value: string
 		name: string
