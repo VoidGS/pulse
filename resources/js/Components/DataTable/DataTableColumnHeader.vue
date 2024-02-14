@@ -35,7 +35,7 @@ const props = defineProps<DataTableColumnHeaderProps>()
 				<DropdownMenuSeparator/>
 				<DropdownMenuItem @click="props.column.toggleVisibility(false)">
 					<EyeOff class="mr-2 h-3.5 w-3.5 text-muted-foreground/70"/>
-					Hide
+					Ocultar
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
