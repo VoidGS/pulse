@@ -28,7 +28,8 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->is_administrator;
+        // return $user->is_administrator;
+        return $user->can('create users');
     }
 
     /**
