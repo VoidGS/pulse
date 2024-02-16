@@ -43,7 +43,6 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'voidgs',
             'email' => 'void@test.com',
-            'is_administrator' => true
         ])->assignRole($admin);
 
         User::factory()->create([

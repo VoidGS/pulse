@@ -12,6 +12,10 @@ use Laravel\Jetstream\Jetstream;
 class UserController extends Controller {
     use PasswordValidationRules;
 
+    public function __construct() {
+        $this->authorizeResource(User::class);
+    }
+
     public function index() {
         return inertia('Users/Index', [
             'users' => UserResource::collection(User::with(['teams', 'ownedTeams'])->get()),
@@ -28,15 +32,15 @@ class UserController extends Controller {
         $this->authorize('create', User::class);
 
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => $this->passwordRules(),
-            'terms'    => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
+            'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ]);
 
         User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 

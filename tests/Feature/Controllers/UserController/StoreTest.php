@@ -1,11 +1,14 @@
 <?php
 
 use App\Models\User;
+use Spatie\Permission\Models\Permission;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\post;
 
 beforeEach(function () {
+    $this->createUsersPermission = $createUsers = Permission::create(['name' => 'create users']);
+
     $this->validData = [
        'name' => 'Void',
        'email' => 'void@test.com',
@@ -18,18 +21,18 @@ it('requires authentication', function () {
     post(route('users.store'))->assertRedirect(route('login'));
 });
 
-it('requires an administrator user', function () {
-    $badUser = User::factory()->create([
-        'is_administrator' => false,
-    ]);
+it('requires create users permission', function () {
+    $badUser = User::factory()->create();
 
     actingAs($badUser)->post(route('users.store'))->assertForbidden();
 });
 
 it('requires valid data', function ($badData, $errors) {
+    $user = User::factory()->create()->givePermissionTo($this->createUsersPermission);
+
     $duplicatedEmailUser = User::factory()->create(['email' => 'duplicated@email.com']);
 
-    actingAs(User::factory()->create(['is_administrator' => true]))
+    actingAs($user)
         ->post(route('users.store', [...$this->validData, ...$badData]))
         ->assertInvalid($errors);
 })->with([
@@ -49,7 +52,9 @@ it('requires valid data', function ($badData, $errors) {
 ]);
 
 it('register a user', function () {
-    actingAs(User::factory()->create(['is_administrator' => true]))
+    $user = User::factory()->create()->givePermissionTo($this->createUsersPermission);
+
+    actingAs($user)
         ->post(route('users.store', $this->validData));
 
     assertDatabaseHas(User::class, ['email' => $this->validData['email']]);
