@@ -2,21 +2,35 @@
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Spatie\Permission\Models\Permission;
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Laravel\withoutExceptionHandling;
+
+beforeEach(function () {
+   $this->seeUsersPermission = $createUsers = Permission::create(['name' => 'see users']);
+});
 
 it('requires authentication', function () {
     get(route('users.index'))->assertRedirect(route('login'));
 });
 
+it('requires see users permission', function () {
+    $badUser = User::factory()->create();
+
+    actingAs($badUser)->get(route('users.index'))->assertForbidden();
+});
+
 it('should return the correct component', function () {
-    $this->actingAs($user = User::factory()->create());
+    $user = User::factory()->create()->givePermissionTo($this->seeUsersPermission);
+
+    actingAs($user);
     get(route('users.index'))->assertComponent('Users/Index');
-})->skip();
+});
 
 it('passes users to the view', function () {
     $users = User::factory(5)->create();
+    $user = User::first()->givePermissionTo($this->seeUsersPermission);
 
-    $this->actingAs($user = User::first());
+    actingAs($user);
     get(route('users.index'))->assertHasResource('users', UserResource::collection($users));
 });

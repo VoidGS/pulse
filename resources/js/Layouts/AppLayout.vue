@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
 import Dropdown from '@/Components/Dropdown.vue';
@@ -27,6 +27,27 @@ const switchToTeam = (team) => {
 const logout = () => {
 	router.post(route('logout'));
 };
+
+const menu = [
+	{
+		name: 'Dashboard',
+		url: route('dashboard'),
+		route: 'dashboard',
+		when: () => usePage().props.auth.user,
+	},
+	{
+		name: 'Usuários',
+		url: route('users.index'),
+		route: 'users.index',
+		when: () => usePage().props.permissions.see_users,
+	},
+	{
+		name: 'Serviços',
+		url: route('services.index'),
+		route: 'services.index',
+		when: () => usePage().props.permissions.see_services,
+	},
+];
 </script>
 
 <template>
@@ -50,23 +71,11 @@ const logout = () => {
 
 							<!-- Navigation Links -->
 							<div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-								<NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-									Dashboard
-								</NavLink>
-							</div>
-
-							<!-- Navigation Links -->
-							<div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-								<NavLink :href="route('users.index')" :active="route().current('users.index')">
-									Usuários
-								</NavLink>
-							</div>
-
-							<!-- Navigation Links -->
-							<div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-								<NavLink :href="route('services.index')" :active="route().current('services.index')">
-									Serviços
-								</NavLink>
+								<template v-for="item in menu" :key="item.name">
+									<NavLink v-if="item.when ? item.when() : true" :href="item.url" :active="route().current(item.route)">
+										{{ item.name }}
+									</NavLink>
+								</template>
 							</div>
 						</div>
 
@@ -249,17 +258,11 @@ const logout = () => {
 				<!-- Responsive Navigation Menu -->
 				<div :class="{'block': showingNavigationDropdown, 'hidden': ! showingNavigationDropdown}" class="sm:hidden">
 					<div class="pt-2 pb-3 space-y-1">
-						<ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-							Dashboard
-						</ResponsiveNavLink>
-
-						<ResponsiveNavLink :href="route('users.index')" :active="route().current('users.index')">
-							Usuários
-						</ResponsiveNavLink>
-
-						<ResponsiveNavLink :href="route('services.index')" :active="route().current('services.index')">
-							Serviços
-						</ResponsiveNavLink>
+						<template v-for="item in menu" :key="item.name">
+							<ResponsiveNavLink v-if="item.when ? item.when() : true" :href="item.url" :active="route().current(item.route)">
+								{{ item.name }}
+							</ResponsiveNavLink>
+						</template>
 					</div>
 
 					<!-- Responsive Settings Options -->
@@ -369,7 +372,7 @@ const logout = () => {
 			<!-- Page Content -->
 			<main>
 				<Container>
-					<Breadcrumb class="" />
+					<Breadcrumb class=""/>
 					<slot/>
 				</Container>
 			</main>
