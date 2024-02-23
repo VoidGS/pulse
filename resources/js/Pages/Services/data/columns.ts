@@ -1,10 +1,21 @@
+// @ts-ignore
+import DataTableColumnHeader from "@/Components/DataTable/DataTableColumnHeader.vue";
+// @ts-ignore
+import DropdownAction, { type DataTableActionItem } from "@/Components/DataTable/DataTableDropdown.vue";
 import type { ColumnDef } from "@tanstack/vue-table";
 import type { Service } from "@/Pages/Services/data/schema";
 import { h } from "vue";
 import { Checkbox } from "@/Components/ui/checkbox";
-import DataTableColumnHeader from "@/Components/DataTable/DataTableColumnHeader.vue";
 import { Avatar, AvatarImage } from "@/Components/ui/avatar";
 import { relativeDate } from "@/Utilities/date";
+import type { Team } from "@/Pages/Teams/data/schema";
+import { Badge } from "@/Components/ui/badge";
+import type { User } from "@/Pages/Users/data/schema";
+import { route } from "momentum-trail";
+import { Pencil, Trash } from "lucide-vue-next";
+import { useForm } from '@inertiajs/vue3';
+
+const form = useForm({});
 
 export const columns: ColumnDef<Service>[] = [
     {
@@ -30,18 +41,53 @@ export const columns: ColumnDef<Service>[] = [
                 title: 'Nome',
             })
         },
-        cell: ({ row }) => h('div', row.getValue('name')),
+        cell: ({ row }) => h('div', { class: "font-medium" }, row.getValue('name')),
     },
-    // {
-    //     accessorKey: 'team',
-    //     header: ({ column }) => {
-    //         return h(DataTableColumnHeader, {
-    //             column: column,
-    //             title: 'Setor',
-    //         })
-    //     },
-    //     cell: ({ row }) => h('div', row.getValue('team')),
-    // },
+    {
+        accessorKey: 'price',
+        header: ({ column }) => {
+            return h(DataTableColumnHeader, {
+                column: column,
+                title: 'Valor',
+            })
+        },
+        cell: ({ row }) => h('div', { class: "text-green-700" }, 'R$ ' + row.getValue('price')),
+    },
+    {
+        accessorKey: 'team',
+        header: ({ column }) => {
+            return h(DataTableColumnHeader, {
+                column: column,
+                title: 'Setor',
+            })
+        },
+        cell: ({ row }) => {
+            const team = row.getValue<Team>('team')
+
+            let teamBadge = h(Badge, { variant: 'outline' }, () => team.name)
+
+            return h('div', { class: 'flex items-center space-x-1' }, [teamBadge])
+        },
+    },
+    {
+        accessorKey: 'user',
+        header: ({ column }) => {
+            return h(DataTableColumnHeader, {
+                column: column,
+                title: 'Responsável',
+            })
+        },
+        cell: ({ row }) => {
+            const user = row.getValue<User>('user')
+
+            return h('div', { class: 'flex items-center space-x-2' }, [
+                h(Avatar, { size: 'xs' }, () => [
+                    h(AvatarImage, { 'src': user.profile_photo_url })
+                ]),
+                h('span', user.name)
+            ])
+        },
+    },
     {
         accessorKey: 'created_at',
         header: ({ column }) => {
@@ -57,4 +103,32 @@ export const columns: ColumnDef<Service>[] = [
             return h('div', formatted)
         },
     },
+    {
+        id: 'actions',
+        enableHiding: false,
+        cell: ({ row }) => {
+            const service = row.original
+            const actions: DataTableActionItem[] = [
+                {
+                    label: 'Editar serviço',
+                    href: route('services.edit', service),
+                    icon: Pencil
+                },
+                {
+                    label: 'Inativar serviço',
+                    href: route('services.destroy', service),
+                    icon: Trash,
+                    class: 'text-red-500 focus:text-red-500',
+                    deleteDialog: {
+                        title: 'Inativar serviço',
+                        description: 'Tem certeza que deseja inativar este serviço?',
+                        deleteActionName: 'Inativar',
+                        deleteAction: () => form.delete(route('services.destroy', service), { preserveState: false })
+                    }
+                }
+            ]
+
+            return h('div', { class: 'relative' }, [h(DropdownAction, { items: actions })])
+        }
+    }
 ]

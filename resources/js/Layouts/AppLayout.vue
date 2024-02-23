@@ -1,5 +1,5 @@
-<script setup>
-import { ref } from 'vue';
+<script lang="ts" setup>
+import { type Component, h, markRaw, onMounted, ref, watch, watchEffect } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
@@ -9,12 +9,66 @@ import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Container from '@/Components/Container.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import { route } from "momentum-trail";
+import { Briefcase, Home, UsersRound, UserRoundPlus, Plus, Settings, Wrench, Pencil } from "lucide-vue-next";
+import { filledIcons, Notification, Notivue, NotivueSwipe, pastelTheme, push } from "notivue";
+import PoliceCarLight from "@/Components/Emojis/PoliceCarLight.vue";
+import Bell from "@/Components/Emojis/Bell.vue";
+import ClappingHands from "@/Components/Emojis/ClappingHands.vue";
+import Information from "@/Components/Emojis/Information.vue";
 
 defineProps({
 	title: String,
 });
 
-const showingNavigationDropdown = ref(false);
+const page = usePage()
+const showingNavigationDropdown = ref(false)
+
+// Toast
+const toastStyle = ref('')
+const toastMessage = ref('')
+const toastIcons = {
+	...filledIcons,
+	success: markRaw(ClappingHands),
+	error: markRaw(PoliceCarLight),
+	info: markRaw(Information),
+	warning: markRaw(Bell)
+}
+
+const showToast = (message: string, style: string) => {
+	if (message == '' || style == '') return
+
+	switch (style) {
+		case 'success':
+			push.success({ title: 'Sucesso', message: message })
+			break
+		case 'danger':
+			push.error({ title: 'Atenção!', message: message })
+			break
+		case 'info':
+			push.info({ title: 'Informação', message: message })
+			break
+		case 'warn':
+			push.warning({ title: 'Alerta', message: message })
+			break
+		default:
+			push.success({ title: 'Notificação', message: message })
+			break
+	}
+}
+
+watchEffect(async () => {
+	toastStyle.value = page.props.jetstream.flash?.toastStyle || page.props.flash?.toastStyle || 'default';
+	toastMessage.value = page.props.jetstream.flash?.toast || page.props.flash?.toast || '';
+});
+
+watch(toastMessage, (message) => {
+	showToast(toastMessage.value, toastStyle.value)
+})
+
+onMounted(() => {
+	showToast(toastMessage.value, toastStyle.value)
+})
 
 const switchToTeam = (team) => {
 	router.put(route('current-team.update'), {
@@ -28,24 +82,108 @@ const logout = () => {
 	router.post(route('logout'));
 };
 
-const menu = [
+// Menu
+const generateRoute = (routes: string[]) => {
+	let formattedRoute = location.pathname
+	routes.forEach((route) => {
+		formattedRoute = formattedRoute.replace(route, '')
+	})
+	return formattedRoute
+}
+
+export interface Menu {
+	name: string
+	url: string
+	route?: string
+	breadcrumbName?: string
+	breadcrumbRoute?: string
+	breadcrumbIcon?: Component
+	showOnMenu?: boolean
+	showOnBreadcrumb?: boolean
+	when?: boolean
+}
+
+const menu: Menu[] = [
 	{
 		name: 'Dashboard',
 		url: route('dashboard'),
 		route: 'dashboard',
-		when: () => usePage().props.auth.user,
+		breadcrumbName: '',
+		breadcrumbRoute: '/',
+		breadcrumbIcon: Home,
+		showOnMenu: true,
+		showOnBreadcrumb: true,
+		when: page.props.auth.user,
 	},
+
+	// Profile
+	{
+		name: 'Configurações',
+		url: route('profile.show'),
+		breadcrumbRoute: '/user/profile',
+		breadcrumbIcon: Settings,
+		showOnBreadcrumb: true
+	},
+
+	// Teams
+	{
+		name: 'Setores',
+		url: route('teams.show', generateRoute(['/teams/'])),
+		breadcrumbRoute: '/teams/' + generateRoute(['/teams/']),
+		breadcrumbIcon: Wrench,
+		showOnBreadcrumb: true
+	},
+	{
+		name: 'Criar setor',
+		url: route('teams.create'),
+		breadcrumbRoute: '/teams/create',
+		breadcrumbIcon: Plus,
+		showOnBreadcrumb: true
+	},
+
+	// Users
 	{
 		name: 'Usuários',
 		url: route('users.index'),
-		route: 'users.index',
-		when: () => usePage().props.permissions.see_users,
+		route: 'users.*',
+		breadcrumbRoute: '/users',
+		breadcrumbIcon: UsersRound,
+		showOnMenu: true,
+		showOnBreadcrumb: true,
+		when: page.props.user_permissions.see_users,
 	},
+	{
+		name: 'Cadastrar usuário',
+		url: route('users.create'),
+		breadcrumbRoute: '/users/create',
+		breadcrumbIcon: UserRoundPlus,
+		showOnBreadcrumb: true
+	},
+
+	// Services
 	{
 		name: 'Serviços',
 		url: route('services.index'),
-		route: 'services.index',
-		when: () => usePage().props.permissions.see_services,
+		route: 'services.*',
+		breadcrumbRoute: '/services',
+		breadcrumbIcon: Briefcase,
+		showOnMenu: true,
+		showOnBreadcrumb: true,
+		when: page.props.user_permissions.see_services,
+	},
+	{
+		name: 'Cadastrar serviço',
+		url: route('services.create'),
+		breadcrumbRoute: '/services/create',
+		breadcrumbIcon: Plus,
+		showOnBreadcrumb: true,
+	},
+	{
+		name: 'Editar serviço',
+		url: route('services.edit', generateRoute(['/services/', '/edit'])),
+		breadcrumbRoute: '/services/' + generateRoute(['/services/', '/edit']) + '/edit',
+		breadcrumbIcon: Pencil,
+		showOnBreadcrumb: true
 	},
 ];
 </script>
@@ -54,34 +192,36 @@ const menu = [
 	<div>
 		<Head :title="title"/>
 
-		<Banner/>
+		<Notivue v-slot="item">
+			<NotivueSwipe :item="item">
+				<Notification :item="item" :icons="toastIcons" :theme="pastelTheme" />
+			</NotivueSwipe>
+		</Notivue>
 
-		<div class="min-h-screen dark:bg-gray-900">
-			<nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-				<!-- Primary Navigation Menu -->
-				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div class="flex justify-between h-16">
-						<div class="flex">
-							<!-- Logo -->
-							<div class="shrink-0 flex items-center">
-								<Link :href="route('dashboard')">
-									<ApplicationMark class="block h-9 w-auto"/>
-								</Link>
-							</div>
+		<div class="flex min-h-screen flex-col bg-background">
+			<!--<Banner/>-->
 
-							<!-- Navigation Links -->
-							<div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-								<template v-for="item in menu" :key="item.name">
-									<NavLink v-if="item.when ? item.when() : true" :href="item.url" :active="route().current(item.route)">
-										{{ item.name }}
-									</NavLink>
-								</template>
-							</div>
-						</div>
+			<header class="sticky z-40 top-0 bg-background/80 backdrop-blur-lg border-b border-border shadow-md">
+				<div class="container flex justify-between h-16 max-w-7xl mx-auto items-center">
+					<div class="flex mr-4">
+						<Link :href="route('dashboard')" class="mr-6 flex items-center space-x-2">
+							<ApplicationMark class="h-9 w-9"/>
+							<!--<span class="font-bold">Pulse</span>-->
+						</Link>
 
-						<div class="hidden sm:flex sm:items-center sm:ms-6">
+						<nav class="items-center space-x-6 font-medium hidden md:flex">
+							<template v-for="item in menu" :key="item.name">
+								<NavLink v-if="item.showOnMenu && item.when" :href="item.url" :active="route().current(item.route)">
+									{{ item.name }}
+								</NavLink>
+							</template>
+						</nav>
+					</div>
+
+					<div class="flex items-center justify-end space-x-4">
+						<div class="hidden md:flex md:items-center md:ms-6">
+							<!-- Teams Dropdown -->
 							<div class="ms-3 relative">
-								<!-- Teams Dropdown -->
 								<Dropdown v-if="$page.props.jetstream.hasTeamFeatures && $page.props.auth.user.all_teams.length > 0"
 										  align="right" width="60">
 									<template #trigger>
@@ -224,42 +364,33 @@ const menu = [
 							</div>
 						</div>
 
-						<!-- Hamburger -->
-						<div class="-me-2 flex items-center sm:hidden">
+						<!--Hamburguer-->
+						<div class="-me-2 flex items-center md:hidden">
 							<button
 								class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out"
 								@click="showingNavigationDropdown = ! showingNavigationDropdown">
-								<svg
-									class="h-6 w-6"
-									stroke="currentColor"
-									fill="none"
-									viewBox="0 0 24 24"
-								>
-									<path
-										:class="{'hidden': showingNavigationDropdown, 'inline-flex': ! showingNavigationDropdown }"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M4 6h16M4 12h16M4 18h16"
-									/>
-									<path
-										:class="{'hidden': ! showingNavigationDropdown, 'inline-flex': showingNavigationDropdown }"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
+								<svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+									<path :class="{'hidden': showingNavigationDropdown, 'inline-flex': ! showingNavigationDropdown }"
+										  stroke-linecap="round"
+										  stroke-linejoin="round"
+										  stroke-width="2"
+										  d="M4 6h16M4 12h16M4 18h16"/>
+									<path :class="{'hidden': ! showingNavigationDropdown, 'inline-flex': showingNavigationDropdown }"
+										  stroke-linecap="round"
+										  stroke-linejoin="round"
+										  stroke-width="2"
+										  d="M6 18L18 6M6 6l12 12"/>
 								</svg>
 							</button>
 						</div>
 					</div>
 				</div>
 
-				<!-- Responsive Navigation Menu -->
-				<div :class="{'block': showingNavigationDropdown, 'hidden': ! showingNavigationDropdown}" class="sm:hidden">
+				<!--Responsive Menu-->
+				<div :class="{'block': showingNavigationDropdown, 'hidden': ! showingNavigationDropdown}" class="md:hidden">
 					<div class="pt-2 pb-3 space-y-1">
 						<template v-for="item in menu" :key="item.name">
-							<ResponsiveNavLink v-if="item.when ? item.when() : true" :href="item.url" :active="route().current(item.route)">
+							<ResponsiveNavLink v-if="item.showOnMenu && item.when" :href="item.url" :active="route().current(item.route)">
 								{{ item.name }}
 							</ResponsiveNavLink>
 						</template>
@@ -286,11 +417,6 @@ const menu = [
 						<div class="mt-3 space-y-1">
 							<ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
 								Perfil
-							</ResponsiveNavLink>
-
-							<ResponsiveNavLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')"
-											   :active="route().current('api-tokens.index')">
-								API Tokens
 							</ResponsiveNavLink>
 
 							<!-- Authentication -->
@@ -360,19 +486,11 @@ const menu = [
 						</div>
 					</div>
 				</div>
-			</nav>
-
-			<!-- Page Heading -->
-			<header v-if="$slots.header" class="bg-white dark:bg-gray-800 shadow">
-				<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-					<slot name="header"/>
-				</div>
 			</header>
 
-			<!-- Page Content -->
 			<main>
 				<Container>
-					<Breadcrumb class=""/>
+					<Breadcrumb :menu="menu"/>
 					<slot/>
 				</Container>
 			</main>

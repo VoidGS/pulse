@@ -40,5 +40,5 @@ Route::middleware([
 
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'update']);
 
-    Route::resource('services', ServiceController::class)->only(['index']);
+    Route::resource('services', ServiceController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 });

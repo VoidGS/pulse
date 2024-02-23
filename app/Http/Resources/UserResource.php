@@ -16,7 +16,7 @@ class UserResource extends JsonResource {
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->when($this->id === $request->user()?->id, $this->email),
-            'teams' => $this->allTeams(),
+            'teams' => $this->when($this->relationLoaded('teams') && $this->relationLoaded('ownedTeams'), fn () => $this->allTeams()),
             'profile_photo_url' => $this->profile_photo_url,
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,

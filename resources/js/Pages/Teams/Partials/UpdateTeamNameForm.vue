@@ -52,7 +52,7 @@ const updateTeamName = () => {
             </div>
 
             <!-- Team Name -->
-            <div class="col-span-6 sm:col-span-4">
+            <div class="col-span-6 md:col-span-4">
                 <InputLabel for="name" value="Nome do setor" />
 
                 <TextInput

@@ -5,29 +5,36 @@ import PageContainer from "@/Components/PageContainer.vue";
 import { Button } from "@/Components/ui/button";
 import { Plus } from "lucide-vue-next";
 import { columns } from "@/Pages/Services/data/columns";
-import { columnsView } from "@/Pages/Services/data/schema";
+import { columnsView, type Service } from "@/Pages/Services/data/schema";
 import DataTable from "@/Components/DataTable/DataTable.vue";
 import { onMounted, ref } from "vue";
-import type { User } from "@/Pages/Users/data/schema";
+import { usePage } from "@inertiajs/vue3";
+import { route } from "momentum-trail";
+import Briefcase from "@/Components/Emojis/Briefcase.vue";
 
-const props = defineProps(['services'])
+const props = defineProps<{
+	services: Service[]
+}>()
 
-const data = ref<User[]>([])
+const data = ref<Service[]>([])
 
-async function getData(): Promise<User[]> {
+async function getData(): Promise<Service[]> {
 	return props.services
 }
 
 onMounted(async () => {
 	data.value = await getData();
 })
+
+const canCreateService = usePage().props.user_permissions.create_services
+const createServiceRoute = route('services.create');
 </script>
 
 <template>
 	<AppLayout title="Serviços">
 		<PageContainer>
 			<div>
-				<img src="/emojis/briefcase.png" class="w-10 h-10 mb-6" alt="Emoji de maleta">
+				<Briefcase class="w-10 h-10 mb-6" />
 
 				<div class="flex items-center justify-between">
 					<div>
@@ -40,9 +47,9 @@ onMounted(async () => {
 						</p>
 					</div>
 
-					<div>
+					<div v-if="canCreateService">
 						<Button as-child>
-							<a>
+							<a :href="createServiceRoute">
 								<Plus class="w-5 h-5 mr-2"/>
 								Cadastrar serviço
 							</a>

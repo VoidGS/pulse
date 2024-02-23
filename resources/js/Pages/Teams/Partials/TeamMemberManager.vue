@@ -115,7 +115,7 @@ const displayableRole = (role) => {
                     </div>
 
                     <!-- Member Email -->
-                    <div class="col-span-6 sm:col-span-4">
+                    <div class="col-span-6 md:col-span-4">
                         <InputLabel for="email" value="Email" />
                         <TextInput
                             id="email"
@@ -178,7 +178,7 @@ const displayableRole = (role) => {
             <SectionBorder />
 
             <!-- Team Member Invitations -->
-            <ActionSection class="mt-10 sm:mt-0">
+            <ActionSection class="mt-10 md:mt-0">
                 <template #title>
 					Convites pendentes
                 </template>
@@ -215,7 +215,7 @@ const displayableRole = (role) => {
             <SectionBorder />
 
             <!-- Manage Team Members -->
-            <ActionSection class="mt-10 sm:mt-0">
+            <ActionSection class="mt-10 md:mt-0">
                 <template #title>
                     Membros do setor
                 </template>

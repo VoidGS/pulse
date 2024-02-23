@@ -38,7 +38,7 @@ const columnLabel = (column: Column<any>) => {
 <template>
 	<DropdownMenu>
 		<DropdownMenuTrigger as-child>
-			<Button variant="outline" size="sm" class="hidden h-8 ml-auto lg:flex">
+			<Button variant="outline" size="sm" class="hidden h-8 ml-auto md:flex">
 				<SlidersHorizontal class="w-4 h-4 mr-2"/>
 				Colunas
 			</Button>

@@ -3,11 +3,13 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { route } from "momentum-trail";
 import { Button } from "@/Components/ui/button";
 import { Plus } from "lucide-vue-next";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { columns } from "@/Pages/Users/data/columns";
 import { columnsView, type User } from "@/Pages/Users/data/schema";
 import DataTable from "@/Components/DataTable/DataTable.vue";
 import PageContainer from "@/Components/PageContainer.vue";
+import { usePage } from "@inertiajs/vue3";
+import OpenFileFolder from "@/Components/Emojis/OpenFileFolder.vue";
 
 const props = defineProps(['users']);
 
@@ -21,15 +23,14 @@ onMounted(async () => {
 	data.value = await getData();
 })
 
+const canCreateUser = usePage().props.user_permissions.create_users
 const createUserRoute = route('users.create');
-const canCreateUser = computed(() => props.users[0].can?.create)
 </script>
 <template>
 	<AppLayout title="Usuários">
 		<PageContainer>
 			<div>
-				<img src="/emojis/open-file-folder.png" class="w-10 h-10 mb-6" alt="Emoji pasta aberta">
-				<!--<FolderOpen class="w-10 h-10 mb-6" />-->
+				<OpenFileFolder class="w-10 h-10 mb-6" />
 
 				<div class="flex items-center justify-between">
 					<div>

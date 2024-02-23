@@ -1,6 +1,6 @@
 <template>
-	<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-bl-lg rounded-br-lg shadow">
-		<div class="flex flex-1 justify-between sm:hidden">
+	<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 md:px-6 rounded-bl-lg rounded-br-lg shadow">
+		<div class="flex flex-1 justify-between md:hidden">
 			<Link :href="previusUrl" :only="only"
 				  class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
 				Anterior
@@ -10,7 +10,7 @@
 				Próximo
 			</Link>
 		</div>
-		<div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+		<div class="hidden md:flex md:flex-1 md:items-center md:justify-between">
 			<div>
 				<p class="text-sm text-gray-700">
 					Exibindo de

@@ -1,11 +1,11 @@
 export interface Team {
-    created_at: string
     id: number
-    membership?: Membership
     name: string
-    personal_team: boolean
-    updated_at: string
     user_id: number
+    membership?: Membership
+    personal_team?: boolean
+    updated_at: string
+    created_at: string
 }
 
 export interface Membership {

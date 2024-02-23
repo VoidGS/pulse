@@ -1,11 +1,12 @@
 import type { Team } from "@/Pages/Teams/data/schema";
 
 export interface User {
-    id: bigint
+    id: number
     name: string
     email: string
     profile_photo_url: string
-    teams: Team[]
+    teams?: Team[]
+    updated_at: string
     created_at: string
 }
 

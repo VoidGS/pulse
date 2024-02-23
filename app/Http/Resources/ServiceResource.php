@@ -16,14 +16,14 @@ class ServiceResource extends JsonResource {
             'id' => $this->id,
             'name' => $this->name,
             'price' => $this->price,
-            'team' => $this->whenLoaded('team', fn () => $this->allTeams()),
+            'team' => $this->whenLoaded('team', fn () => TeamResource::make($this->team)),
             'user' => $this->whenLoaded('user', fn () => UserResource::make($this->user)),
             'active' => $this->active,
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,
-            // 'can' => [
-            //     'create' => $request->user()?->can('create', $this->resource),
-            // ],
+            'can' => [
+                'delete' => $request->user()?->can('delete', $this->resource),
+            ],
         ];
     }
 }

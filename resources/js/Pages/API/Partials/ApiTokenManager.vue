@@ -86,7 +86,7 @@ const deleteApiToken = () => {
 
             <template #form>
                 <!-- Token Name -->
-                <div class="col-span-6 sm:col-span-4">
+                <div class="col-span-6 md:col-span-4">
                     <InputLabel for="name" value="Name" />
                     <TextInput
                         id="name"
@@ -128,7 +128,7 @@ const deleteApiToken = () => {
             <SectionBorder />
 
             <!-- Manage API Tokens -->
-            <div class="mt-10 sm:mt-0">
+            <div class="mt-10 md:mt-0">
                 <ActionSection>
                     <template #title>
                         Manage API Tokens

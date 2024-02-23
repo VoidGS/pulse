@@ -1,5 +1,5 @@
 // @ts-ignore
-import DropdownAction from "@/Components/DataTable/DataTableDropdown.vue";
+import DropdownAction, { type DataTableActionItem } from "@/Components/DataTable/DataTableDropdown.vue";
 // @ts-ignore
 import DataTableColumnHeader from "@/Components/DataTable/DataTableColumnHeader.vue";
 import { h } from 'vue';
@@ -7,8 +7,11 @@ import type { ColumnDef } from "@tanstack/vue-table";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Badge } from "@/Components/ui/badge";
 import { Avatar, AvatarImage } from "@/Components/ui/avatar";
-import type { Team, User } from "@/Pages/Users/data/schema";
+import type { User } from "@/Pages/Users/data/schema";
+import type { Team } from "@/Pages/Teams/data/schema";
 import { relativeDate } from "@/Utilities/date";
+import { route } from "momentum-trail";
+import { Pencil, Trash } from "lucide-vue-next";
 
 export const columns: ColumnDef<User>[] = [
     {
@@ -76,15 +79,26 @@ export const columns: ColumnDef<User>[] = [
             return h('div', formatted)
         },
     },
-    // {
-    //     id: 'actions',
-    //     enableHiding: false,
-    //     cell: ({ row }) => {
-    //         const user = row.original
-    //
-    //         return h('div', { class: 'relative' }), h(DropdownAction, {
-    //             user,
-    //         })
-    //     }
-    // }
+    {
+        id: 'actions',
+        enableHiding: false,
+        cell: ({ row }) => {
+            const user = row.original
+            const actions: DataTableActionItem[] = [
+                {
+                    label: 'Editar usuário',
+                    href: route('services.edit', user),
+                    icon: Pencil
+                },
+                {
+                    label: 'Inativar usuário',
+                    href: route('services.destroy', user),
+                    icon: Trash,
+                    class: 'text-red-500 focus:text-red-500'
+                }
+            ]
+
+            return h('div', { class: 'relative' }, [h(DropdownAction, { items: actions })])
+        }
+    }
 ]
