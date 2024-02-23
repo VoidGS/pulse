@@ -9,6 +9,7 @@ export const avatarVariant = cva(
     {
         variants: {
             size: {
+                xxs: 'h-6 w-6 text-xs',
                 xs: 'h-8 w-8 text-xs',
                 sm: 'h-10 w-10 text-sm',
                 base: 'h-16 w-16 text-2xl',

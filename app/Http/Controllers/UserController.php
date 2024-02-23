@@ -18,7 +18,7 @@ class UserController extends Controller {
 
     public function index() {
         return inertia('Users/Index', [
-            'users' => UserResource::collection(User::with(['teams', 'ownedTeams'])->get()),
+            'users' => UserResource::collection(User::with(['teams', 'ownedTeams'])->where('active', true)->get()),
         ]);
     }
 
@@ -42,7 +42,7 @@ class UserController extends Controller {
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-        ]);
+        ])->assignRole('member');
 
         return to_route('users.index');
     }

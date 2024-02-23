@@ -13,13 +13,11 @@ use Laravel\Jetstream\Events\TeamMemberAdded;
 use Laravel\Jetstream\Jetstream;
 use Laravel\Jetstream\Rules\Role;
 
-class AddTeamMember implements AddsTeamMembers
-{
+class AddTeamMember implements AddsTeamMembers {
     /**
      * Add a new team member to the given team.
      */
-    public function add(User $user, Team $team, string $email, string $role = null): void
-    {
+    public function add(User $user, Team $team, string $email, string $role = null): void {
         Gate::forUser($user)->authorize('addTeamMember', $team);
 
         $this->validate($team, $email, $role);
@@ -33,18 +31,21 @@ class AddTeamMember implements AddsTeamMembers
         );
 
         TeamMemberAdded::dispatch($team, $newTeamMember);
+
+        if (!$newTeamMember->currentTeam) {
+            $newTeamMember->switchTeam($team);
+        }
     }
 
     /**
      * Validate the add member operation.
      */
-    protected function validate(Team $team, string $email, ?string $role): void
-    {
+    protected function validate(Team $team, string $email, ?string $role): void {
         Validator::make([
             'email' => $email,
             'role' => $role,
         ], $this->rules(), [
-            'email.exists' => __('We were unable to find a registered user with this email address.'),
+            'email.exists' => __('Não foi possível encontrar um usuário com este endereço de email.'),
         ])->after(
             $this->ensureUserIsNotAlreadyOnTeam($team, $email)
         )->validateWithBag('addTeamMember');
@@ -55,26 +56,24 @@ class AddTeamMember implements AddsTeamMembers
      *
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
-    protected function rules(): array
-    {
+    protected function rules(): array {
         return array_filter([
             'email' => ['required', 'email', 'exists:users'],
             'role' => Jetstream::hasRoles()
-                            ? ['required', 'string', new Role]
-                            : null,
+                ? ['required', 'string', new Role()]
+                : null,
         ]);
     }
 
     /**
      * Ensure that the user is not already on the team.
      */
-    protected function ensureUserIsNotAlreadyOnTeam(Team $team, string $email): Closure
-    {
+    protected function ensureUserIsNotAlreadyOnTeam(Team $team, string $email): Closure {
         return function ($validator) use ($team, $email) {
             $validator->errors()->addIf(
                 $team->hasUserWithEmail($email),
                 'email',
-                __('This user already belongs to the team.')
+                __('Este usuário já pertence a esse setor.')
             );
         };
     }

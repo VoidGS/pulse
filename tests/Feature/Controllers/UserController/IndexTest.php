@@ -7,7 +7,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 beforeEach(function () {
-   $this->seeUsersPermission = $createUsers = Permission::create(['name' => 'see users']);
+   $this->seeUsersPermission = Permission::create(['name' => 'see users']);
 });
 
 it('requires authentication', function () {
@@ -28,7 +28,8 @@ it('should return the correct component', function () {
 });
 
 it('passes users to the view', function () {
-    $users = User::factory(5)->create();
+    User::factory(5)->create();
+    $users = User::with(['teams', 'ownedTeams'])->get();
     $user = User::first()->givePermissionTo($this->seeUsersPermission);
 
     actingAs($user);
