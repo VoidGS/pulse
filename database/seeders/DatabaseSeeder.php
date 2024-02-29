@@ -50,6 +50,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'crift@test.com',
         ])->assignRole($member);
 
-        User::factory(20)->create();
+        User::factory(20)->create()->each(function ($user) {
+            $user->assignRole('member');
+        });
     }
 }

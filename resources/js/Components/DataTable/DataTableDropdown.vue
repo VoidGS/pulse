@@ -28,6 +28,7 @@ export interface DataTableActionItem {
 	icon?: Component
 	class?: HTMLAttributes['class']
 	onClick?: () => void
+	show: boolean
 }
 
 const props = defineProps<{
@@ -36,6 +37,7 @@ const props = defineProps<{
 
 const openDropdownMenu = ref(false)
 const openDeleteDialog = ref(false)
+
 const closeDropDown = (item: DataTableActionItem) => {
 	if (item.deleteDialog) return
 	openDropdownMenu.value = false
@@ -66,7 +68,7 @@ function copy(id: string) {
 			<DropdownMenuContent align="end">
 				<DropdownMenuLabel>Ações</DropdownMenuLabel>
 				<template v-for="item in items" :key="item.label">
-					<DropdownMenuItem as-child @select.prevent="closeDropDown(item)" class="flex items-center space-x-1.5 cursor-pointer">
+					<DropdownMenuItem v-if="item.show" as-child @select.prevent="closeDropDown(item)" class="flex items-center space-x-1.5 cursor-pointer">
 						<template v-if="!item.deleteDialog">
 							<a :href="item.href" :class="item.class"
 							   @click="item.onClick ? item.onClick() : null">

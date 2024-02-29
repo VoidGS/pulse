@@ -26,7 +26,7 @@ it('requires authentication', function () {
     put(route('services.update', Service::factory()->create()))->assertRedirect(route('login'));
 });
 
-it('requires create services permission', function () {
+it('requires edit services permission', function () {
     $badUser = User::factory()->create();
 
     actingAs($badUser)->put(route('services.update', Service::factory()->create()))->assertForbidden();

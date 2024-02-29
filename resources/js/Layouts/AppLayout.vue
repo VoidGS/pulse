@@ -159,6 +159,13 @@ const menu: Menu[] = [
 		breadcrumbIcon: UserRoundPlus,
 		showOnBreadcrumb: true
 	},
+	{
+		name: 'Editar usuário',
+		url: route('users.edit', generateRoute(['/users/', '/edit'])),
+		breadcrumbRoute: '/users/' + generateRoute(['/users/', '/edit']) + '/edit',
+		breadcrumbIcon: Pencil,
+		showOnBreadcrumb: true
+	},
 
 	// Services
 	{

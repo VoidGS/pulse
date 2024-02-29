@@ -6,6 +6,15 @@ export interface User {
     email: string
     profile_photo_url: string
     teams?: Team[]
+    role?: string
+    updated_at: string
+    created_at: string
+}
+
+export interface Role {
+    id: number
+    name: string
+    guard_name: string
     updated_at: string
     created_at: string
 }

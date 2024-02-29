@@ -31,7 +31,7 @@ class UserPolicy {
      * Determine whether the user can update the model.
      */
     public function update(User $user, User $model): bool {
-        return $user->can('edit users');
+        return $user->can('edit users') && $model->id !== $user->id;
     }
 
     /**

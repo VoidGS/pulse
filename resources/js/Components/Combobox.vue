@@ -60,7 +60,7 @@ const filterFunction = (list: typeof itemsValues, search: string) => list.filter
 		<PopoverTrigger as-child>
 			<FormControl>
 				<Button variant="outline" role="combobox" :aria-expanded="open"
-						:class="cn('w-full justify-between', !itemsValues && 'text-muted-foreground')">
+						:class="cn('w-full justify-between', props.itemSelected ? '' : 'text-muted-foreground')">
 					{{ props.itemSelected ? itemsValues.find((model) => model.id === props.itemSelected)?.label : selectMessage }}
 					<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50"/>
 				</Button>

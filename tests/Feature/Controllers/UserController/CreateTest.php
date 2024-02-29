@@ -24,5 +24,5 @@ it('return the correct component', function () {
 
     actingAs($user)
         ->get(route('users.create'))
-        ->assertComponent('Auth/Register');
+        ->assertComponent('Users/Create');
 });

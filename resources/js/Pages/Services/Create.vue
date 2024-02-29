@@ -23,12 +23,12 @@ const props = defineProps<{
 
 const formSchema = toTypedSchema(z.object({
 	name: z.string().min(2).max(255),
-	price: z.number().min(1).max(99999),
+	price: z.number().max(99999),
 	team: z.coerce.number({ invalid_type_error: "Escolha um setor" }).positive('Escolha um setor'),
 	user: z.coerce.number({ invalid_type_error: "Escolha um responsável" }).positive('Escolha um responsável')
 }))
 
-const { values, setValues, handleSubmit, resetForm } = useForm({
+const { values, setValues, handleSubmit, setErrors } = useForm({
 	initialValues: {
 		name: '',
 		price: 0,
@@ -40,7 +40,11 @@ const { values, setValues, handleSubmit, resetForm } = useForm({
 
 const onSubmit = handleSubmit((formValues) => {
 	const form = inertiaUseForm(formValues)
-	form.post(route('services.store'))
+	form.post(route('services.store'), {
+		onError: (errors) => {
+			setErrors(errors)
+		}
+	})
 })
 
 const teamsSetValue = (value) => setValues({ team: value })

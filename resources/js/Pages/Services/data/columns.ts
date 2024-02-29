@@ -13,7 +13,7 @@ import { Badge } from "@/Components/ui/badge";
 import type { User } from "@/Pages/Users/data/schema";
 import { route } from "momentum-trail";
 import { Pencil, Trash } from "lucide-vue-next";
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 
 const form = useForm({});
 
@@ -112,7 +112,8 @@ export const columns: ColumnDef<Service>[] = [
                 {
                     label: 'Editar serviço',
                     href: route('services.edit', service),
-                    icon: Pencil
+                    icon: Pencil,
+                    show: usePage<any>().props.user_permissions.edit_services
                 },
                 {
                     label: 'Inativar serviço',
@@ -124,7 +125,8 @@ export const columns: ColumnDef<Service>[] = [
                         description: 'Tem certeza que deseja inativar este serviço?',
                         deleteActionName: 'Inativar',
                         deleteAction: () => form.delete(route('services.destroy', service), { preserveState: false })
-                    }
+                    },
+                    show: usePage<any>().props.user_permissions.delete_services
                 }
             ]
 

@@ -2,18 +2,21 @@
 
 use App\Models\User;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\post;
 
 beforeEach(function () {
-    $this->createUsersPermission = $createUsers = Permission::create(['name' => 'create users']);
+    $this->createUsersPermission = Permission::create(['name' => 'create users']);
+    $this->adminRole = Role::create(['name' => 'admin']);
 
     $this->validData = [
-       'name' => 'Void',
-       'email' => 'void@test.com',
-       'password' => 'password',
-       'password_confirmation' => 'password',
+        'name' => 'Void',
+        'email' => 'void@test.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'role' => $this->adminRole->id,
     ];
 });
 

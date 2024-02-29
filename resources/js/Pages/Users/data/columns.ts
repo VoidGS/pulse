@@ -12,6 +12,9 @@ import type { Team } from "@/Pages/Teams/data/schema";
 import { relativeDate } from "@/Utilities/date";
 import { route } from "momentum-trail";
 import { Pencil, Trash } from "lucide-vue-next";
+import { useForm, usePage } from "@inertiajs/vue3";
+
+const form = useForm({});
 
 export const columns: ColumnDef<User>[] = [
     {
@@ -87,14 +90,22 @@ export const columns: ColumnDef<User>[] = [
             const actions: DataTableActionItem[] = [
                 {
                     label: 'Editar usuário',
-                    href: route('services.edit', user),
-                    icon: Pencil
+                    href: route('users.edit', user),
+                    icon: Pencil,
+                    show: usePage<any>().props.user_permissions.edit_users
                 },
                 {
                     label: 'Inativar usuário',
-                    href: route('services.destroy', user),
+                    href: route('users.destroy', user),
                     icon: Trash,
-                    class: 'text-red-500 focus:text-red-500'
+                    class: 'text-red-500 focus:text-red-500',
+                    deleteDialog: {
+                        title: 'Inativar usuário',
+                        description: 'Tem certeza que deseja inativar este usuário?',
+                        deleteActionName: 'Inativar',
+                        deleteAction: () => form.delete(route('users.destroy', user), { preserveState: false })
+                    },
+                    show: usePage<any>().props.user_permissions.delete_users
                 }
             ]
 
