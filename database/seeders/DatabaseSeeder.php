@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -53,5 +54,7 @@ class DatabaseSeeder extends Seeder
         User::factory(20)->create()->each(function ($user) {
             $user->assignRole('member');
         });
+
+        Customer::factory(20)->create();
     }
 }

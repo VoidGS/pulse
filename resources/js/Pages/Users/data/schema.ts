@@ -7,6 +7,7 @@ export interface User {
     profile_photo_url: string
     teams?: Team[]
     role?: string
+    active: boolean
     updated_at: string
     created_at: string
 }

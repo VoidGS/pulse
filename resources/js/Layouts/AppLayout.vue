@@ -10,7 +10,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Container from '@/Components/Container.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { route } from "momentum-trail";
-import { Briefcase, Home, UsersRound, UserRoundPlus, Plus, Settings, Wrench, Pencil } from "lucide-vue-next";
+import { Briefcase, Home, UsersRound, UserRoundPlus, Plus, Settings, Wrench, Pencil, BookUser } from "lucide-vue-next";
 import { filledIcons, Notification, Notivue, NotivueSwipe, pastelTheme, push } from "notivue";
 import PoliceCarLight from "@/Components/Emojis/PoliceCarLight.vue";
 import Bell from "@/Components/Emojis/Bell.vue";
@@ -192,6 +192,32 @@ const menu: Menu[] = [
 		breadcrumbIcon: Pencil,
 		showOnBreadcrumb: true
 	},
+
+	// Customer
+	{
+		name: 'Clientes',
+		url: route('customers.index'),
+		route: 'customers.*',
+		breadcrumbRoute: '/customers',
+		breadcrumbIcon: BookUser,
+		showOnMenu: true,
+		showOnBreadcrumb: true,
+		when: page.props.user_permissions.see_customers,
+	},
+	{
+		name: 'Cadastrar cliente',
+		url: route('customers.create'),
+		breadcrumbRoute: '/customers/create',
+		breadcrumbIcon: Plus,
+		showOnBreadcrumb: true,
+	},
+	// {
+	// 	name: 'Editar cliente',
+	// 	url: route('customers.edit', generateRoute(['/customers/', '/edit'])),
+	// 	breadcrumbRoute: '/customers/' + generateRoute(['/customers/', '/edit']) + '/edit',
+	// 	breadcrumbIcon: Pencil,
+	// 	showOnBreadcrumb: true
+	// },
 ];
 </script>
 

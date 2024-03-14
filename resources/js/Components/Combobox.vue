@@ -22,7 +22,7 @@ interface ModelKeys {
 const props = defineProps<{
 	items: [{}],
 	itemsKeys: ModelKeys
-	itemSelected: string
+	itemSelected: string | undefined
 	itemSetValue: (value: any) => void
 	options?: ModelOptions
 }>()
