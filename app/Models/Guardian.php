@@ -4,21 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class CustomerGuardian extends Model
-{
+class Guardian extends Model {
     use HasFactory;
 
     protected $fillable = [
         'name',
         'cpf',
-        'gender',
-        'customer_id',
+        'phone',
+        'email',
         'birthdate',
     ];
 
-    public function customer(): BelongsTo {
-        return $this->belongsTo(Customer::class);
+    public function customer(): BelongsToMany {
+        return $this->belongsToMany(Customer::class)->withTimestamps();
     }
 }

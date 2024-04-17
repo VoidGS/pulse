@@ -1,17 +1,29 @@
 export interface Customer {
     id: number
     name: string
-    cpf: string
-    gender: string
-    birthdate: Date
+    cpf?: string
+    phone?: string
+    email?: string
+    birthdate: string
     active: boolean
     updated_at: string
     created_at: string
 }
 
 export interface Discount {
-    service: string,
+    id?: number,
+    service_id?: number,
+    service: number,
     discount: number
+}
+
+export interface Guardian {
+    id: number
+    name: string
+    cpf: string
+    phone: string
+    email: string
+    birthdate: Date
 }
 
 export const columnsView = [
@@ -24,8 +36,11 @@ export const columnsView = [
         label: 'cpf'
     },
     {
-        id: 'gender',
-        label: 'gênero'
+        id: 'phone',
+        label: 'Telefone'
+    },{
+        id: 'email',
+        label: 'Email'
     },
     {
         id: 'birthdate',

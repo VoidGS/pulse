@@ -2,7 +2,7 @@ import type { Team } from "@/Pages/Teams/data/schema";
 import type { User } from "@/Pages/Users/data/schema";
 
 export interface Service {
-    id: bigint
+    id: number
     name: string
     price: number
     team: Team

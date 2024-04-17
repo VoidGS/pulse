@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
@@ -13,12 +14,13 @@ class Customer extends Model
     protected $fillable = [
         'name',
         'cpf',
-        'gender',
         'birthdate',
+        'phone',
+        'email'
     ];
 
-    public function guardians(): HasMany {
-        return $this->hasMany(CustomerGuardian::class);
+    public function guardians(): BelongsToMany {
+        return $this->belongsToMany(Guardian::class)->withTimestamps();
     }
 
     public function discounts(): HasMany {

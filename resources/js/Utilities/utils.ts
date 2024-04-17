@@ -1,3 +1,6 @@
+import axios from "axios";
+import { route } from "momentum-trail";
+
 function formatCPF(cpf: string) {
     cpf = cpf.replace(/\D/g, "")
 
@@ -14,7 +17,32 @@ function validateCPF(cpf: string) {
     return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10]
 }
 
+async function validateServerGuardianCPF(cpf: string) {
+    if (!validateCPF(cpf)) return false
+    let validCpf = false
+
+    await axios.get(route('guardians.index') + '?cpf=' + unmaskCPF(cpf)).then((response) => {
+        if (typeof response !== 'object') return true
+
+        validCpf = response.data.length < 1
+    })
+
+    return validCpf
+}
+
+function unmaskCPF(cpf: string) {
+    return cpf.replace(/\D+/g, "");
+}
+
+function validatePhone(phone: string) {
+    phone = phone.replace(/\D+/g, '')
+    return phone.match('^((1[1-9])|([2-9][0-9]))((3[0-9]{3}[0-9]{4})|(9[0-9]{3}[0-9]{5}))$')
+}
+
 export {
     formatCPF,
-    validateCPF
+    validateCPF,
+    validateServerGuardianCPF,
+    unmaskCPF,
+    validatePhone
 }

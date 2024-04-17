@@ -17,11 +17,10 @@ const props = defineProps<{
 	getServicesWithoutDiscount: (services: Service[]) => Service[],
 	updateServices: (services: Service[]) => void,
 	pushDiscount: (discount: Discount) => void,
-	removeDiscount: (index: number) => void,
 }>()
 
 const discountFormSchema = toTypedSchema(z.object({
-	service: z.string().min(1, 'Selecione um serviço'),
+	service: z.coerce.number({ invalid_type_error: "Obrigatório" }).min(1, 'Selecione um serviço'),
 	discount: z.coerce.number({ invalid_type_error: "Obrigatório" }).min(1).max(100)
 }))
 
@@ -39,7 +38,7 @@ const discountOnSubmit = handleSubmit((formValues) => {
 })
 
 const servicesSetValue = (value) => setValues({ service: value })
-const servicesComboboxArrayKeys = { id: 'name', label: 'name' }
+const servicesComboboxArrayKeys = { id: 'id', label: 'name' }
 const servicesComboboxOptions = { searchMessage: 'Pesquise um serviço...', selectMessage: 'Selecione um serviço...' }
 
 const discountTotalValue = ref(0)
@@ -48,12 +47,10 @@ watch(values, (newValues) => {
 	if (!newValues.service) return
 	if (!newValues.discount) return
 
-	const service = props.services.find((service) => service.name === newValues.service?.toString())
+	const service = props.services.find((service) => service.id === parseInt(newValues.service))
 
 	discountTotalValue.value = service ? (service.price - (service.price * (newValues.discount / 100))) : 0
 })
-
-// 'R$ ' + (props.services.find(service => service.name === values.service?.toString())?.price - props.services.find(service => service.name === values.service?.toString())?.price * (10 / 100)) ?? 'R$ 0,00'
 </script>
 <template>
 	<form @submit="discountOnSubmit" class="space-y-4">

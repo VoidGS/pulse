@@ -9,20 +9,11 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class DatabaseSeeder extends Seeder
-{
+class DatabaseSeeder extends Seeder {
     /**
      * Seed the application's database.
      */
-    public function run(): void
-    {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
+    public function run(): void {
         $admin = Role::create(['name' => 'admin']);
         $member = Role::create(['name' => 'member']);
 
@@ -55,6 +46,6 @@ class DatabaseSeeder extends Seeder
             $user->assignRole('member');
         });
 
-        Customer::factory(20)->create();
+        Customer::factory(10)->create();
     }
 }

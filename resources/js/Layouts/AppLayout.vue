@@ -11,11 +11,12 @@ import Container from '@/Components/Container.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { route } from "momentum-trail";
 import { Briefcase, Home, UsersRound, UserRoundPlus, Plus, Settings, Wrench, Pencil, BookUser } from "lucide-vue-next";
-import { filledIcons, Notification, Notivue, NotivueSwipe, pastelTheme, push } from "notivue";
+import { filledIcons, Notification, Notivue, NotivueSwipe, pastelTheme } from "notivue";
 import PoliceCarLight from "@/Components/Emojis/PoliceCarLight.vue";
 import Bell from "@/Components/Emojis/Bell.vue";
 import ClappingHands from "@/Components/Emojis/ClappingHands.vue";
 import Information from "@/Components/Emojis/Information.vue";
+import { showToast } from "@/Utilities/toast";
 
 defineProps({
 	title: String,
@@ -33,28 +34,6 @@ const toastIcons = {
 	error: markRaw(PoliceCarLight),
 	info: markRaw(Information),
 	warning: markRaw(Bell)
-}
-
-const showToast = (message: string, style: string) => {
-	if (message == '' || style == '') return
-
-	switch (style) {
-		case 'success':
-			push.success({ title: 'Sucesso', message: message })
-			break
-		case 'danger':
-			push.error({ title: 'Atenção!', message: message })
-			break
-		case 'info':
-			push.info({ title: 'Informação', message: message })
-			break
-		case 'warn':
-			push.warning({ title: 'Alerta', message: message })
-			break
-		default:
-			push.success({ title: 'Notificação', message: message })
-			break
-	}
 }
 
 watchEffect(async () => {
@@ -211,13 +190,13 @@ const menu: Menu[] = [
 		breadcrumbIcon: Plus,
 		showOnBreadcrumb: true,
 	},
-	// {
-	// 	name: 'Editar cliente',
-	// 	url: route('customers.edit', generateRoute(['/customers/', '/edit'])),
-	// 	breadcrumbRoute: '/customers/' + generateRoute(['/customers/', '/edit']) + '/edit',
-	// 	breadcrumbIcon: Pencil,
-	// 	showOnBreadcrumb: true
-	// },
+	{
+		name: 'Editar cliente',
+		url: route('customers.edit', generateRoute(['/customers/', '/edit'])),
+		breadcrumbRoute: '/customers/' + generateRoute(['/customers/', '/edit']) + '/edit',
+		breadcrumbIcon: Pencil,
+		showOnBreadcrumb: true
+	},
 ];
 </script>
 

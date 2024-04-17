@@ -13,19 +13,23 @@ import { Input } from "@/Components/ui/input";
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { vMaska } from "maska";
 import { Button } from "@/Components/ui/button";
-import { formatDate } from "@/Utilities/date";
+import { formatDate, formatServerDate } from "@/Utilities/date";
 import { Minus, Percent } from "lucide-vue-next";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Separator } from "@/Components/ui/separator";
 import type { Service } from "@/Pages/Services/data/schema";
 import AddDiscountForm from "@/Pages/Customers/Partials/AddDiscountForm.vue";
-import type { Discount, Guardian } from "@/Pages/Customers/data/schema";
-import { ref } from "vue";
+import type { Customer, Discount, Guardian } from "@/Pages/Customers/data/schema";
+import { onMounted, ref, toRaw } from "vue";
+import { Link } from "lucide-vue-next";
 import CreateGuardianDialog from "@/Pages/Customers/Partials/CreateGuardianDialog.vue";
 import LinkGuardianDialog from "@/Pages/Customers/Partials/LinkGuardianDialog.vue";
 import { showToast } from "@/Utilities/toast";
 
 const props = defineProps<{
+	customer: Customer,
+	guardians: Guardian[],
+	discounts: Discount[],
 	services: Service[]
 }>()
 
@@ -46,7 +50,8 @@ const formSchema = toTypedSchema(z.object({
 	})),
 	hasDiscounts: z.boolean().default(false),
 	discounts: z.array(z.object({
-		service: z.number().min(1),
+		id: z.number().optional(),
+		service: z.coerce.number().min(1),
 		discount: z.coerce.number().min(1).max(100)
 	})),
 }).partial()
@@ -96,12 +101,36 @@ const { values, setValues, handleSubmit, setErrors } = useForm({
 	validationSchema: formSchema
 })
 
+onMounted(() => {
+	let showDiscounts = props.discounts.map((discount) => {
+		return {
+			id: discount.id,
+			service: discount.service_id,
+			discount: discount.discount
+		}
+	})
+
+	console.log(showDiscounts)
+
+	setValues({
+		name: props.customer.name,
+		cpf: props.customer.cpf,
+		birthdate: formatServerDate(props.customer.birthdate),
+		phone: props.customer.phone,
+		email: props.customer.email,
+		hasGuardians: props.guardians.length > 0,
+		guardians: props.guardians,
+		hasDiscounts: props.discounts.length > 0,
+		discounts: showDiscounts
+	})
+})
+
 const onSubmit = handleSubmit((formValues) => {
 	// console.log(formValues)
 
 	const inertiaForm = inertiaUseForm(formValues)
 
-	inertiaForm.post(route('customers.store'), {
+	inertiaForm.put(route('customers.update', props.customer.id), {
 		onError: (errors) => {
 			setErrors(errors)
 		}

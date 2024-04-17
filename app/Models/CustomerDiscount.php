@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CustomerDiscount extends Model
-{
+class CustomerDiscount extends Model {
     use HasFactory;
 
     protected $fillable = [
+        'discount',
         'customer_id',
         'service_id',
     ];

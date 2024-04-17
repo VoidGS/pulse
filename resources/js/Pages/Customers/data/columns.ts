@@ -55,22 +55,35 @@ export const columns: ColumnDef<Customer>[] = [
         cell: ({ row }) => {
             const cpf = row.getValue<string>('cpf')
 
-            return h('div', formatCPF(cpf))
+            return h('div', cpf ? formatCPF(cpf) : 'Sem CPF.')
         },
     },
     {
-        accessorKey: 'gender',
+        accessorKey: 'phone',
         header: ({ column }) => {
             return h(DataTableColumnHeader, {
                 column: column,
-                title: 'Gênero',
+                title: 'Telefone',
             })
         },
         cell: ({ row }) => {
-            const gender: string = row.getValue('gender')
-            const genderArr = {'M': 'Masculino', 'F': 'Feminino'}
+            const phone = row.getValue<string>('phone')
 
-            return h('div', genderArr[gender])
+            return h('div', phone ?? 'Sem telefone.')
+        },
+    },
+    {
+        accessorKey: 'email',
+        header: ({ column }) => {
+            return h(DataTableColumnHeader, {
+                column: column,
+                title: 'Email',
+            })
+        },
+        cell: ({ row }) => {
+            const email = row.getValue<string>('email')
+
+            return h('div', email ?? 'Sem email.')
         },
     },
     {
@@ -111,20 +124,20 @@ export const columns: ColumnDef<Customer>[] = [
             const actions: DataTableActionItem[] = [
                 {
                     label: 'Editar cliente',
-                    href: route('users.edit', user),
+                    href: route('customers.edit', user),
                     icon: Pencil,
                     show: usePage<any>().props.user_permissions.edit_customers
                 },
                 {
                     label: 'Inativar cliente',
-                    href: route('users.destroy', user),
+                    href: route('customers.destroy', user),
                     icon: Trash,
                     class: 'text-red-500 focus:text-red-500',
                     deleteDialog: {
                         title: 'Inativar cliente',
                         description: 'Tem certeza que deseja inativar este cliente?',
                         deleteActionName: 'Inativar',
-                        deleteAction: () => form.delete(route('users.destroy', user), { preserveState: false })
+                        deleteAction: () => form.delete(route('customers.destroy', user), { preserveState: false })
                     },
                     show: usePage<any>().props.user_permissions.delete_customers
                 }

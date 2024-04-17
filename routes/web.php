@@ -1,14 +1,12 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\GuardianController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
-use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Laravel\Fortify\Http\Controllers\RegisteredUserController;
-use Laravel\Fortify\RoutePath;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,5 +41,6 @@ Route::middleware([
 
     Route::resource('services', ServiceController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
-    Route::resource('customers', CustomerController::class)->only(['index', 'create', 'store']);
+    Route::resource('customers', CustomerController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    Route::resource('guardians', GuardianController::class)->only(['index']);
 });

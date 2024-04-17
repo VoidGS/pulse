@@ -15,13 +15,12 @@ class CustomerFactory extends Factory {
      * @return array<string, mixed>
      */
     public function definition(): array {
-        $genderArr = ['M', 'F'];
-
         return [
             'name' => $this->faker->name(),
             'cpf' => $this->faker->cpf(false),
-            'gender' => $genderArr[array_rand($genderArr)],
-            'birthdate' => $this->faker->date()
+            'birthdate' => $this->faker->date(),
+            'phone' => $this->faker->phoneNumber(),
+            'email' => $this->faker->email(),
         ];
     }
 }
