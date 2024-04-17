@@ -110,8 +110,6 @@ onMounted(() => {
 		}
 	})
 
-	console.log(showDiscounts)
-
 	setValues({
 		name: props.customer.name,
 		cpf: props.customer.cpf,
@@ -123,6 +121,8 @@ onMounted(() => {
 		hasDiscounts: props.discounts.length > 0,
 		discounts: showDiscounts
 	})
+
+	updateServicesRef(getServicesWithoutDiscount(props.services))
 })
 
 const onSubmit = handleSubmit((formValues) => {
@@ -158,7 +158,6 @@ const removeGuardian = (index: number) => guardiansArray.remove(index)
 const servicesRef = ref<Service[]>(props.services)
 const updateServicesRef = (services: Service[]) => {
 	servicesRef.value = services
-	console.log(services)
 }
 const getServicesWithoutDiscount = (services: Service[]) => {
 	return services.filter((service) => {

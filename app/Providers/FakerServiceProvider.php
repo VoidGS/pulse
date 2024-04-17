@@ -5,6 +5,7 @@ namespace App\Providers;
 use Faker\Factory;
 use Faker\Generator;
 use Faker\Provider\pt_BR\Person;
+use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Support\ServiceProvider;
 
 class FakerServiceProvider extends ServiceProvider {
@@ -20,6 +21,7 @@ class FakerServiceProvider extends ServiceProvider {
             $faker = Factory::create($locale);
 
             $faker->addProvider(new Person($faker));
+            $faker->addProvider(new PhoneNumber($faker));
 
             return $faker;
         });

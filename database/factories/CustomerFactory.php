@@ -19,7 +19,7 @@ class CustomerFactory extends Factory {
             'name' => $this->faker->name(),
             'cpf' => $this->faker->cpf(false),
             'birthdate' => $this->faker->date(),
-            'phone' => $this->faker->phoneNumber(),
+            'phone' => $this->faker->cellphoneNumber(),
             'email' => $this->faker->email(),
         ];
     }
