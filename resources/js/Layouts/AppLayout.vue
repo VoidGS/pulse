@@ -87,7 +87,7 @@ const menu: Menu[] = [
 		name: 'Dashboard',
 		url: route('dashboard'),
 		route: 'dashboard',
-		breadcrumbName: '',
+		breadcrumbName: 'Dashboard',
 		breadcrumbRoute: '/',
 		breadcrumbIcon: Home,
 		showOnMenu: true,
