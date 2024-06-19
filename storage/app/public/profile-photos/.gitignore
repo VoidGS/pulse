@@ -1,6 +1,2 @@
 *
-!*.jpg
-!*.png
-!*.gif
-!*.webp
 !.gitignore
