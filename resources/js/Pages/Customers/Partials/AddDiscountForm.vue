@@ -4,12 +4,12 @@ import Combobox from "@/Components/Combobox.vue";
 import { toTypedSchema } from "@vee-validate/zod";
 import { z } from "@/lib/pt-zod";
 import { useForm } from "vee-validate";
-import type { Service } from "@/Pages/Services/data/schema";
+import type { Service } from "@/Pages/Services/Data/schema";
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { Input } from "@/Components/ui/input";
 import { Percent, Plus } from 'lucide-vue-next';
 import { Button } from "@/Components/ui/button";
-import type { Discount } from "@/Pages/Customers/data/schema";
+import type { Discount } from "@/Pages/Customers/Data/schema";
 import { ref, watch } from "vue";
 
 const props = defineProps<{

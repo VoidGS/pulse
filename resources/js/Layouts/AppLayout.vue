@@ -10,7 +10,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Container from '@/Components/Container.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { route } from "momentum-trail";
-import { Briefcase, Home, UsersRound, UserRoundPlus, Plus, Settings, Wrench, Pencil, BookUser } from "lucide-vue-next";
+import { Briefcase, Home, UsersRound, UserRoundPlus, Plus, Settings, Wrench, Pencil, BookUser, CalendarDays } from "lucide-vue-next";
 import { filledIcons, Notification, Notivue, NotivueSwipe, pastelTheme } from "notivue";
 import PoliceCarLight from "@/Components/Emojis/PoliceCarLight.vue";
 import Bell from "@/Components/Emojis/Bell.vue";
@@ -197,6 +197,17 @@ const menu: Menu[] = [
 		breadcrumbIcon: Pencil,
 		showOnBreadcrumb: true
 	},
+
+	{
+		name: 'Agendamentos',
+		url: route('schedules.index'),
+		route: 'schedules.*',
+		breadcrumbRoute: '/schedules',
+		breadcrumbIcon: CalendarDays,
+		showOnMenu: true,
+		showOnBreadcrumb: true,
+		when: true,
+	}
 ];
 </script>
 

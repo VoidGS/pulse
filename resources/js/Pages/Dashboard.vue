@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { DollarSign, Users, CreditCard, Activity, SquareArrowOutUpRight } from 'lucide-vue-next'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import { Button } from "@/Components/ui/button";
-import { Calendar } from "@/Components/ui/calendar";
+import { Calendar } from "@/Components/ui/v-calendar";
 import { type Ref, ref } from "vue";
 import { type DateValue, getLocalTimeZone, today } from "@internationalized/date";
 
@@ -133,7 +133,9 @@ const calendarValue = ref(today(getLocalTimeZone())) as Ref<DateValue>
 						<CardTitle>Calendário</CardTitle>
 					</CardHeader>
 					<CardContent class="grid gap-8">
-						<Calendar v-model="calendarValue" locale="pt-BR" />
+						<div>
+							<Calendar v-model="calendarValue" locale="pt-BR" class="rounded-md border" />
+						</div>
 					</CardContent>
 				</Card>
 			</div>

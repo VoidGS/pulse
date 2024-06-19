@@ -8,7 +8,7 @@ import { Link } from "lucide-vue-next";
 import { Separator } from "@/Components/ui/separator";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/Components/ui/form";
 import { Input } from "@/Components/ui/input";
-import type { Guardian } from "@/Pages/Customers/data/schema";
+import type { Guardian } from "@/Pages/Customers/Data/schema";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
 import { Info } from 'lucide-vue-next'
 import { formatCPF } from "@/Utilities/utils";

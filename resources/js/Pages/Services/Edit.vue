@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import PageContainer from "@/Components/PageContainer.vue";
-import type { Service } from "@/Pages/Services/data/schema";
+import type { Service } from "@/Pages/Services/Data/schema";
 import { Button } from "@/Components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/Components/ui/form";
 import { Input } from "@/Components/ui/input";
@@ -13,8 +13,8 @@ import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { useForm } from "vee-validate";
 import { useForm as inertiaUseForm } from "@inertiajs/vue3";
 import { route } from "momentum-trail";
-import type { Team } from "@/Pages/Teams/data/schema";
-import type { User } from "@/Pages/Users/data/schema";
+import type { Team } from "@/Pages/Teams/Data/schema";
+import type { User } from "@/Pages/Users/Data/schema";
 import { onMounted } from "vue";
 import Pencil from "@/Components/Emojis/Pencil.vue";
 

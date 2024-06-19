@@ -7,7 +7,7 @@ import { z } from "@/lib/pt-zod";
 import { useForm } from "vee-validate";
 import { useForm as inertiaUseForm, usePage } from "@inertiajs/vue3";
 import { route } from "momentum-trail";
-import type { Role } from "@/Pages/Users/data/schema";
+import type { Role } from "@/Pages/Users/Data/schema";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/Components/ui/form";
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { Input } from "@/Components/ui/input";

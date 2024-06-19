@@ -5,7 +5,7 @@ import { Input } from "@/Components/ui/input";
 import { Separator } from "@/Components/ui/separator";
 import { Button } from "@/Components/ui/button";
 import { Plus } from "lucide-vue-next";
-import type { Guardian } from "@/Pages/Customers/data/schema";
+import type { Guardian } from "@/Pages/Customers/Data/schema";
 import { toTypedSchema } from "@vee-validate/zod";
 import { z } from "@/lib/pt-zod";
 import { unmaskCPF, validateCPF, validatePhone, validateServerGuardianCPF } from "@/Utilities/utils";

@@ -87,7 +87,14 @@ class ServiceController extends Controller {
             'user' => ['required', 'numeric'],
         ]);
 
-        $service->update($data);
+        $dataUpdate = [
+            'name' => $data['name'],
+            'price' => $data['price'],
+            'team_id' => $data['team'],
+            'user_id' => $data['user']
+        ];
+
+        $service->update($dataUpdate);
 
         return to_route('services.index')->toastSuccess('Serviço atualizado com sucesso!');
     }

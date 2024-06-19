@@ -10,8 +10,8 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/Comp
 import { Input } from "@/Components/ui/input";
 import { Button } from "@/Components/ui/button";
 import CurrencyInput from "@/Components/CurrencyInput.vue";
-import type { Team } from '@/Pages/Teams/data/schema';
-import type { User } from "@/Pages/Users/data/schema";
+import type { Team } from '@/Pages/Teams/Data/schema';
+import type { User } from "@/Pages/Users/Data/schema";
 import Combobox from "@/Components/Combobox.vue";
 import { route } from 'momentum-trail'
 import Sparkles from "@/Components/Emojis/Sparkles.vue";

@@ -1,7 +1,6 @@
 <template>
-	<!--TODO Fix on mobile-->
 	<div class="overflow-hidden rounded-lg border bg-background shadow-md md:shadow-xl">
-		<div class="hidden h-full flex-1 flex-col space-y-2 p-8 md:flex">
+		<div class="container flex-1 items-start md:grid space-y-2 p-8">
 			<slot />
 		</div>
 	</div>

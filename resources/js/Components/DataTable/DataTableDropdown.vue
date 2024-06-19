@@ -2,6 +2,7 @@
 import { MoreHorizontal } from "lucide-vue-next";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/Components/ui/dropdown-menu";
 import { Button } from "@/Components/ui/button";
+import { Link } from '@inertiajs/vue3'
 import { type Component, type HTMLAttributes, ref } from "vue";
 import {
 	Dialog,
@@ -70,19 +71,19 @@ function copy(id: string) {
 				<template v-for="item in items" :key="item.label">
 					<DropdownMenuItem v-if="item.show" as-child @select.prevent="closeDropDown(item)" class="flex items-center space-x-1.5 cursor-pointer">
 						<template v-if="!item.deleteDialog">
-							<a :href="item.href" :class="item.class"
-							   @click="item.onClick ? item.onClick() : null">
+							<Link :href="item.href" :class="item.class"
+							   @click="item.onClick ? item.onClick() : null" preserve-scroll preserve-state>
 								<component v-if="item.icon" :is="item.icon" class="w-3 h-3" strokeWidth="2.8"/>
 								<span>{{ item.label }}</span>
-							</a>
+							</Link>
 						</template>
 
 						<template v-else>
 							<DialogTrigger as-child>
-								<a href="#" :class="item.class">
+								<Link href="#" :class="item.class" preserve-scroll preserve-state>
 									<component v-if="item.icon" :is="item.icon" class="w-3 h-3" strokeWidth="2.8"/>
 									<span>{{ item.label }}</span>
-								</a>
+								</Link>
 							</DialogTrigger>
 
 							<DialogContent>

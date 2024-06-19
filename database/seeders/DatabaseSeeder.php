@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Customer;
+use App\Models\Service;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -32,7 +34,12 @@ class DatabaseSeeder extends Seeder {
         Permission::create(['name' => 'edit customers'])->syncRoles([$admin]);
         Permission::create(['name' => 'delete customers'])->syncRoles([$admin]);
 
-        User::factory()->create([
+        Permission::create(['name' => 'see schedules'])->syncRoles([$admin, $member]);
+        Permission::create(['name' => 'create schedules'])->syncRoles([$admin]);
+        Permission::create(['name' => 'edit schedules'])->syncRoles([$admin]);
+        Permission::create(['name' => 'delete schedules'])->syncRoles([$admin]);
+
+        $voidgs = User::factory()->create([
             'name' => 'voidgs',
             'email' => 'void@test.com',
         ])->assignRole($admin);
@@ -47,5 +54,14 @@ class DatabaseSeeder extends Seeder {
         });
 
         Customer::factory(10)->create();
+
+        $team = Team::factory()->create(['user_id' => $voidgs->id]);
+        $voidgs->switchTeam($team);
+
+        Service::factory()->create([
+            'name' => 'Sessão de psico',
+            'price' => 150.00,
+            'team_id' => $team->id
+        ]);
     }
 }

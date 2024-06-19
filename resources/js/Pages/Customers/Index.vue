@@ -9,8 +9,8 @@ import { usePage } from "@inertiajs/vue3";
 import { route } from "momentum-trail";
 import DataTable from "@/Components/DataTable/DataTable.vue";
 import { onMounted, ref } from "vue";
-import { columnsView, type Customer } from "@/Pages/Customers/data/schema";
-import { columns } from "@/Pages/Customers/data/columns";
+import { columnsView, type Customer } from "@/Pages/Customers/Data/schema";
+import { columns } from "@/Pages/Customers/Data/columns";
 
 const props = defineProps(['customers']);
 

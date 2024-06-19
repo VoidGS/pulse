@@ -19,13 +19,15 @@ interface ModelKeys {
 	icon?: string
 }
 
-const props = defineProps<{
+export interface ComboboxProps {
 	items: [{}],
 	itemsKeys: ModelKeys
 	itemSelected: string | undefined
 	itemSetValue: (value: any) => void
 	options?: ModelOptions
-}>()
+}
+
+const props = defineProps<ComboboxProps>()
 
 interface ModelValue {
 	id: string
