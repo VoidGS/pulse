@@ -54,6 +54,16 @@ export const columns: ColumnDef<Service>[] = [
         cell: ({ row }) => h('div', { class: "text-green-700" }, 'R$ ' + row.getValue('price')),
     },
     {
+        accessorKey: 'duration',
+        header: ({ column }) => {
+            return h(DataTableColumnHeader, {
+                column: column,
+                title: 'Duração',
+            })
+        },
+        cell: ({ row }) => h('div', row.getValue('duration') + ' minuto(s)')
+    },
+    {
         accessorKey: 'team',
         header: ({ column }) => {
             return h(DataTableColumnHeader, {

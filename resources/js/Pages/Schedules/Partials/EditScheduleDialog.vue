@@ -58,10 +58,12 @@ const servicesDialogSetValue = (value) => setValues({ serviceId: value })
 const servicesDialogComboboxArrayKeys = { id: 'id', label: 'name' }
 const servicesDialogComboboxOptions = { searchMessage: 'Pesquise um serviço', selectMessage: 'Selecione o serviço' }
 
+const submitType = ref(0)
+
 const onSubmit = handleSubmit((formValues) => {
 	if (!editScheduleDialogState.schedule) return
 
-	const form = inertiaUseForm(formValues)
+	const form = inertiaUseForm({...formValues, 'submitType': submitType.value})
 	form.put(route('schedules.update', editScheduleDialogState.schedule.id), {
 		preserveScroll: true,
 		onError: (errors) => {
@@ -180,9 +182,25 @@ watch(() => editScheduleDialogState.open, (newOpenState) => {
 				</div>
 
 				<DialogFooter>
-					<Button type="submit">
-						Salvar
-					</Button>
+					<template v-if="editScheduleDialogState.schedule?.recurrence_id">
+						<Button @click="submitType = 0" type="submit">
+							Salvar
+						</Button>
+					</template>
+
+					<template v-else>
+						<Button @click="submitType = 0" type="submit">
+							Salvar apenas esse
+						</Button>
+
+						<Button @click="submitType = 1" type="submit">
+							Salvar todos
+						</Button>
+
+						<Button @click="submitType = 2" type="submit">
+							Salvar a partir desse em diante
+						</Button>
+					</template>
 				</DialogFooter>
 			</form>
 		</DialogScrollContent>

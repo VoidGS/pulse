@@ -17,6 +17,7 @@ import type { Team } from "@/Pages/Teams/Data/schema";
 import type { User } from "@/Pages/Users/Data/schema";
 import { onMounted } from "vue";
 import Pencil from "@/Components/Emojis/Pencil.vue";
+import { NumberField, NumberFieldContent, NumberFieldDecrement, NumberFieldIncrement, NumberFieldInput } from "@/Components/ui/number-field";
 
 const props = defineProps<{
 	service: Service,
@@ -26,17 +27,19 @@ const props = defineProps<{
 
 const formSchema = toTypedSchema(z.object({
 	name: z.string().min(2).max(255),
-	price: z.number().min(1).max(99999),
+	price: z.number({ invalid_type_error: "Obrigatório" }).positive().max(99999),
+	duration: z.number({ invalid_type_error: "Obrigatório" }).int().nonnegative().max(99),
 	team: z.coerce.number({ invalid_type_error: "Escolha um setor" }).positive('Escolha um setor'),
 	user: z.coerce.number({ invalid_type_error: "Escolha um responsável" }).positive('Escolha um responsável')
 }))
 
 const { values, setValues, handleSubmit, resetForm } = useForm({
 	initialValues: {
-		name: '',
-		price: 0,
-		team: 0,
-		user: 0
+		name: props.service.name,
+		price: props.service.price,
+		duration: props.service.duration,
+		team: props.service.team.id,
+		user: props.service.user.id
 	},
 	validationSchema: formSchema
 })
@@ -54,14 +57,14 @@ const usersSetValue = (value) => setValues({ user: value })
 const usersComboboxArrayKeys = { id: 'id', label: 'name' }
 const usersComboboxOptions = { searchMessage: 'Pesquise um responsável...', selectMessage: 'Selecione um responsável...' }
 
-onMounted(() => {
-	setValues({
-		name: props.service.name,
-		price: props.service.price,
-		team: props.service.team.id,
-		user: props.service.user.id
-	})
-})
+// onMounted(() => {
+// 	setValues({
+// 		name: props.service.name,
+// 		price: props.service.price,
+// 		team: props.service.team.id,
+// 		user: props.service.user.id
+// 	})
+// })
 </script>
 
 <template>
@@ -86,7 +89,7 @@ onMounted(() => {
 			<div class="pt-4">
 				<form @submit="onSubmit" class="space-y-4">
 					<div class="grid gap-6">
-						<div class="grid grid-cols-2 gap-8">
+						<div class="grid grid-cols-3 gap-8">
 							<FormField v-slot="{ componentField }" name="name">
 								<FormItem v-auto-animate>
 									<FormLabel>Nome</FormLabel>
@@ -97,11 +100,33 @@ onMounted(() => {
 								</FormItem>
 							</FormField>
 
-							<FormField v-slot="{ componentField }" name="price">
+							<FormField v-slot="{ componentField }" name="duration">
+								<FormItem v-auto-animate>
+									<FormLabel>Duração (minutos)</FormLabel>
+									<NumberField :min="0" :default-value="props.service.duration" @update:model-value="(v) => {
+											if (v) {
+												setValues({ 'duration': v })
+											} else {
+												setValues({ 'duration': 0 })
+											}
+										}">
+										<NumberFieldContent>
+											<NumberFieldDecrement/>
+											<FormControl>
+												<NumberFieldInput/>
+											</FormControl>
+											<NumberFieldIncrement/>
+										</NumberFieldContent>
+									</NumberField>
+									<FormMessage/>
+								</FormItem>
+							</FormField>
+
+							<FormField v-slot="{ componentField, handleChange, value }" name="price">
 								<FormItem v-auto-animate>
 									<FormLabel>Valor</FormLabel>
 									<FormControl>
-										<CurrencyInput name="price"/>
+										<CurrencyInput :handle-change="handleChange" :field-value="value" />
 									</FormControl>
 									<FormMessage/>
 								</FormItem>

@@ -41,6 +41,7 @@ class ServiceController extends Controller {
         $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999'],
+            'duration' => ['required', 'integer', 'min:0', 'max:99'],
             'team' => ['required', 'numeric'],
             'user' => ['required', 'numeric'],
         ]);
@@ -48,6 +49,7 @@ class ServiceController extends Controller {
         Service::create([
             'name' => $request->name,
             'price' => $request->price,
+            'duration' => $request->duration,
             'team_id' => $request->team,
             'user_id' => $request->user,
         ]);
@@ -83,6 +85,7 @@ class ServiceController extends Controller {
         $data = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999'],
+            'duration' => ['required', 'integer', 'min:0', 'max:99'],
             'team' => ['required', 'numeric'],
             'user' => ['required', 'numeric'],
         ]);
@@ -90,6 +93,7 @@ class ServiceController extends Controller {
         $dataUpdate = [
             'name' => $data['name'],
             'price' => $data['price'],
+            'duration' => $data['duration'],
             'team_id' => $data['team'],
             'user_id' => $data['user']
         ];

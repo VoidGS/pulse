@@ -15,6 +15,13 @@ import type { User } from "@/Pages/Users/Data/schema";
 import Combobox from "@/Components/Combobox.vue";
 import { route } from 'momentum-trail'
 import Sparkles from "@/Components/Emojis/Sparkles.vue";
+import {
+	NumberField,
+	NumberFieldContent,
+	NumberFieldDecrement,
+	NumberFieldIncrement,
+	NumberFieldInput
+} from "@/Components/ui/number-field";
 
 const props = defineProps<{
 	teams: Team[],
@@ -23,7 +30,8 @@ const props = defineProps<{
 
 const formSchema = toTypedSchema(z.object({
 	name: z.string().min(2).max(255),
-	price: z.number().max(99999),
+	price: z.number({ invalid_type_error: "Obrigatório" }).positive().max(99999),
+	duration: z.number({ invalid_type_error: "Obrigatório" }).int().nonnegative().max(99),
 	team: z.coerce.number({ invalid_type_error: "Escolha um setor" }).positive('Escolha um setor'),
 	user: z.coerce.number({ invalid_type_error: "Escolha um responsável" }).positive('Escolha um responsável')
 }))
@@ -31,7 +39,8 @@ const formSchema = toTypedSchema(z.object({
 const { values, setValues, handleSubmit, setErrors } = useForm({
 	initialValues: {
 		name: '',
-		price: 0,
+		price: null,
+		duration: '',
 		team: '',
 		user: ''
 	},
@@ -78,7 +87,7 @@ const usersComboboxOptions = { searchMessage: 'Pesquise um responsável...', sel
 			<div class="pt-4">
 				<form @submit="onSubmit" class="space-y-4">
 					<div class="grid gap-6">
-						<div class="grid grid-cols-2 gap-8">
+						<div class="grid grid-cols-3 gap-8">
 							<FormField v-slot="{ componentField }" name="name">
 								<FormItem v-auto-animate>
 									<FormLabel>Nome</FormLabel>
@@ -89,11 +98,33 @@ const usersComboboxOptions = { searchMessage: 'Pesquise um responsável...', sel
 								</FormItem>
 							</FormField>
 
-							<FormField v-slot="{ componentField }" name="price">
+							<FormField v-slot="{ componentField }" name="duration">
+								<FormItem v-auto-animate>
+									<FormLabel>Duração (minutos)</FormLabel>
+									<NumberField :min="0" @update:model-value="(v) => {
+											if (v) {
+												setValues({ 'duration': v })
+											} else {
+												setValues({ 'duration': 0 })
+											}
+										}">
+										<NumberFieldContent>
+											<NumberFieldDecrement/>
+											<FormControl>
+												<NumberFieldInput/>
+											</FormControl>
+											<NumberFieldIncrement/>
+										</NumberFieldContent>
+									</NumberField>
+									<FormMessage/>
+								</FormItem>
+							</FormField>
+
+							<FormField v-slot="{ componentField, handleChange, value }" name="price">
 								<FormItem v-auto-animate>
 									<FormLabel>Valor</FormLabel>
 									<FormControl>
-										<CurrencyInput name="price"/>
+										<CurrencyInput :handle-change="handleChange" :field-value="value" />
 									</FormControl>
 									<FormMessage/>
 								</FormItem>

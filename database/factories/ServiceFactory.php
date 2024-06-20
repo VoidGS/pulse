@@ -23,6 +23,7 @@ class ServiceFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'price' => $this->faker->randomFloat(2),
+            'duration' => $this->faker->randomNumber(2),
             'team_id' => Team::factory()->create(['user_id' => $user]),
             'user_id' => $user,
             'active' => true

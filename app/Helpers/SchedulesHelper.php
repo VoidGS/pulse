@@ -6,6 +6,7 @@ use App\Enums\ScheduleStatus;
 use App\Enums\ScheduleStatusColor;
 use App\Models\Customer;
 use App\Models\Schedule;
+use App\Models\Service;
 use Carbon\Carbon;
 use Spatie\GoogleCalendar\Event;
 
@@ -41,6 +42,46 @@ class SchedulesHelper {
             }
 
             $i++;
+        }
+    }
+
+    public static function createSchedule(mixed $item, bool $fromRecurrenceFunc = false, int|null $index = null): void {
+        $customer = Customer::find($item['customer_id']);
+        $service = Service::find($item['service_id']);
+        $recurrenceId = null;
+
+        if ($fromRecurrenceFunc) {
+            $startDate = Carbon::createFromDate($item['start_date'])->addWeeks($index);
+            $endDate = Carbon::createFromDate($item['end_date'])->addWeeks($index);
+            $recurrenceId = $item['recurrence_id'];
+        } else {
+            $startDate = Carbon::createFromDate($item['start_date']);
+            $endDate = Carbon::createFromDate($item['start_date'])->addMinutes($service->duration);
+        }
+
+        $recurrenceEvent = new Event();
+        $recurrenceEvent->name = "Agendamento " . $customer->name;
+        $recurrenceEvent->startDateTime = $startDate;
+        $recurrenceEvent->endDateTime = $endDate;
+        $recurrenceEvent->setColorId(ScheduleStatusColor::PENDENTE->value);
+        $newRecurrenceEvent = $recurrenceEvent->save();
+
+        if (!$fromRecurrenceFunc && $item['hasRecurrence']) {
+            $recurrenceId = $newRecurrenceEvent->id;
+        }
+
+        $recurrenceSchedule = new Schedule();
+        $recurrenceSchedule->customer_id = $item['customer_id'];
+        $recurrenceSchedule->service_id = $item['service_id'];
+        $recurrenceSchedule->start_date = $startDate->setTimezone('America/Sao_Paulo');
+        $recurrenceSchedule->end_date = $endDate->setTimezone('America/Sao_Paulo');
+        $recurrenceSchedule->status = ScheduleStatus::PENDENTE;
+        $recurrenceSchedule->event_id = $newRecurrenceEvent->id;
+        $recurrenceSchedule->recurrence_id = $recurrenceId;
+        $recurrenceSchedule->save();
+
+        if (!$fromRecurrenceFunc && $item['hasRecurrence']) {
+            self::generateFutureSchedulesRecurrence($recurrenceSchedule);
         }
     }
 }

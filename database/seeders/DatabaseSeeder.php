@@ -61,6 +61,7 @@ class DatabaseSeeder extends Seeder {
         Service::factory()->create([
             'name' => 'Sessão de psico',
             'price' => 150.00,
+            'duration' => 60,
             'team_id' => $team->id
         ]);
     }

@@ -46,47 +46,53 @@ class ScheduleController extends Controller {
         try {
             DB::beginTransaction();
 
+            $data = $request->validate([
+                'scheduleDate' => ['required', 'date'],
+                'customerId' => ['required', 'numeric', 'exists:customers,id'],
+                'serviceId' => ['required', 'numeric', 'exists:services,id'],
+                'hasRecurrence' => ['required', 'boolean'],
+            ]);
 
+            // $event = new Event();
+            // $event->name = "Agendamento " . Customer::find($data['customerId'])->name;
+            // $event->startDateTime = Carbon::createFromDate($data['scheduleDate']);
+            // $event->endDateTime = Carbon::createFromDate($data['scheduleDate'])->addHour();
+            // $event->setColorId(ScheduleStatusColor::PENDENTE->value);
+            // $newEvent = $event->save();
+            //
+            // $schedule = new Schedule();
+            // $schedule->customer_id = $data['customerId'];
+            // $schedule->service_id = $data['serviceId'];
+            // $schedule->start_date = Carbon::createFromDate($data['scheduleDate'])->setTimezone('America/Sao_Paulo');
+            // $schedule->end_date = Carbon::createFromDate($data['scheduleDate'])->addHour()->setTimezone('America/Sao_Paulo');
+            // $schedule->status = ScheduleStatus::PENDENTE;
+            // $schedule->event_id = $newEvent->id;
+            // if ($data['hasRecurrence']) {
+            //     $schedule->recurrence_id = $newEvent->id;
+            // }
+            // $schedule->save();
+            //
+            // if ($data['hasRecurrence']) {
+            //     SchedulesHelper::generateFutureSchedulesRecurrence($schedule);
+            // }
+
+            $item = [
+                'start_date' => $data['scheduleDate'],
+                'customer_id' => $data['customerId'],
+                'service_id' => $data['serviceId'],
+                'hasRecurrence' => $data['hasRecurrence']
+            ];
+            SchedulesHelper::createSchedule($item);
+
+            DB::commit();
+
+            return to_route('schedules.index')->toastSuccess('Agendamento cadastrado com sucesso!');
         } catch (\Exception $e) {
             DB::rollBack();
 
             // throw $e;
             return to_route('schedules.index')->toastDanger('Ocorreu um erro no servidor.');
         }
-
-        $data = $request->validate([
-            'scheduleDate' => ['required', 'date'],
-            'customerId' => ['required', 'numeric', 'exists:customers,id'],
-            'serviceId' => ['required', 'numeric', 'exists:services,id'],
-            'hasRecurrence' => ['required', 'boolean'],
-        ]);
-
-        $event = new Event();
-        $event->name = "Agendamento " . Customer::find($data['customerId'])->name;
-        $event->startDateTime = Carbon::createFromDate($data['scheduleDate']);
-        $event->endDateTime = Carbon::createFromDate($data['scheduleDate'])->addHour();
-        $event->setColorId(ScheduleStatusColor::PENDENTE->value);
-        $newEvent = $event->save();
-
-        $schedule = new Schedule();
-        $schedule->customer_id = $data['customerId'];
-        $schedule->service_id = $data['serviceId'];
-        $schedule->start_date = Carbon::createFromDate($data['scheduleDate'])->setTimezone('America/Sao_Paulo');
-        $schedule->end_date = Carbon::createFromDate($data['scheduleDate'])->addHour()->setTimezone('America/Sao_Paulo');
-        $schedule->status = ScheduleStatus::PENDENTE;
-        $schedule->event_id = $newEvent->id;
-        if ($data['hasRecurrence']) {
-            $schedule->recurrence_id = $newEvent->id;
-        }
-        $schedule->save();
-
-        if ($data['hasRecurrence']) {
-            SchedulesHelper::generateFutureSchedulesRecurrence($schedule);
-        }
-
-        DB::commit();
-
-        return to_route('schedules.index')->toastSuccess('Agendamento cadastrado com sucesso!');
     }
 
     /**
@@ -107,39 +113,51 @@ class ScheduleController extends Controller {
      * Update the specified resource in storage.
      */
     public function update(Request $request, Schedule $schedule) {
-        $data = $request->validate([
-            'scheduleDate' => ['required', 'date'],
-            'customerId' => ['required', 'numeric'],
-            'serviceId' => ['required', 'numeric'],
-            'status' => ['required', 'string'],
-            'hasRecurrence' => ['required', 'boolean'],
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $event = Event::find($schedule->event_id);
+            $data = $request->validate([
+                'scheduleDate' => ['required', 'date'],
+                'customerId' => ['required', 'numeric'],
+                'serviceId' => ['required', 'numeric'],
+                'status' => ['required', 'string'],
+                'hasRecurrence' => ['required', 'boolean'],
+                'submitType' => ['required', 'integer']
+            ]);
 
-        if ($event->status == 'cancelled') {
-            return to_route('schedules.index')->toastDanger('Este agendamento não existe mais no Google Agenda. É recomendado que inative o agendamento.');
+            $event = Event::find($schedule->event_id);
+
+            if ($event->status == 'cancelled') {
+                return to_route('schedules.index')->toastDanger('Este agendamento não existe mais no Google Agenda. É recomendado que inative o agendamento.');
+            }
+
+            $statusName = strtoupper($data['status']);
+            $eventColodId = constant("\App\Enums\ScheduleStatusColor::{$statusName}")->value;
+
+            $event->setColorId($eventColodId);
+            $event->update([
+                'startDateTime' => Carbon::createFromDate($data['scheduleDate']),
+                'endDateTime' => Carbon::createFromDate($data['scheduleDate'])->addHour(),
+            ]);
+
+            $updateData = [
+                'customer_id' => $data['customerId'],
+                'service_id' => $data['serviceId'],
+                'start_date' => Carbon::createFromDate($data['scheduleDate'])->setTimezone('America/Sao_Paulo'),
+                'end_date' => Carbon::createFromDate($data['scheduleDate'])->addHour()->setTimezone('America/Sao_Paulo'),
+                'status' => ScheduleStatus::from($data['status'])->value,
+            ];
+            $schedule->update($updateData);
+
+            DB::commit();
+
+            return to_route('schedules.index')->toastSuccess('Agendamento editado com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // throw $e;
+            return to_route('schedules.index')->toastDanger('Ocorreu um erro no servidor.');
         }
-
-        $statusName = strtoupper($data['status']);
-        $eventColodId = constant("\App\Enums\ScheduleStatusColor::{$statusName}")->value;
-
-        $event->setColorId($eventColodId);
-        $event->update([
-            'startDateTime' => Carbon::createFromDate($data['scheduleDate']),
-            'endDateTime' => Carbon::createFromDate($data['scheduleDate'])->addHour(),
-        ]);
-
-        $updateData = [
-            'customer_id' => $data['customerId'],
-            'service_id' => $data['serviceId'],
-            'start_date' => Carbon::createFromDate($data['scheduleDate'])->setTimezone('America/Sao_Paulo'),
-            'end_date' => Carbon::createFromDate($data['scheduleDate'])->addHour()->setTimezone('America/Sao_Paulo'),
-            'status' => ScheduleStatus::from($data['status'])->value,
-        ];
-        $schedule->update($updateData);
-
-        return to_route('schedules.index')->toastSuccess('Agendamento editado com sucesso!');
     }
 
     /**

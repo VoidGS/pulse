@@ -16,6 +16,7 @@ class ServiceResource extends JsonResource {
             'id' => $this->id,
             'name' => $this->name,
             'price' => $this->price,
+            'duration' => $this->duration,
             'team' => $this->whenLoaded('team', fn () => TeamResource::make($this->team)),
             'user' => $this->whenLoaded('user', fn () => UserResource::make($this->user)),
             'active' => $this->active,

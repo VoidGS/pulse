@@ -5,6 +5,7 @@ export interface Service {
     id: number
     name: string
     price: number
+    duration: number
     team: Team
     user: User
     active: boolean
@@ -19,6 +20,10 @@ export const columnsView = [
     {
         id: 'price',
         label: 'valor'
+    },
+    {
+        id: 'duration',
+        label: 'duração'
     },
     {
         id: 'team',

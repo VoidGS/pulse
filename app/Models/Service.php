@@ -15,6 +15,7 @@ class Service extends Model {
     protected $fillable = [
         'name',
         'price',
+        'duration',
         'team_id',
         'user_id',
         'active'

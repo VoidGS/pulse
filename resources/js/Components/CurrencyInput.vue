@@ -1,12 +1,14 @@
 <script lang="ts" setup>
-import { watch, onMounted } from 'vue';
+import { watch, onMounted, ref } from 'vue';
 import { CurrencyDisplay, useCurrencyInput } from 'vue-currency-input';
 import { Input } from '@/Components/ui/input';
-import { useField } from "vee-validate";
 
 const props = defineProps<{
-	name: String,
+	handleChange: (e: (Event | unknown), shouldValidate?: boolean) => void,
+	fieldValue: number|string|null
 }>()
+
+const value = ref(props.fieldValue)
 
 const { inputRef, formattedValue, numberValue, setValue } = useCurrencyInput({
 	locale: 'pt-BR',
@@ -21,18 +23,16 @@ const { inputRef, formattedValue, numberValue, setValue } = useCurrencyInput({
 	accountingSign: false,
 });
 
-const { handleChange, value } = useField<Number>(props.name);
-
 onMounted(() => {
 	setTimeout(() => {
-		if (value.value) {
+		if (value) {
 			setValue(value.value)
 		}
 	}, 300)
 })
 
 watch(numberValue, (newValue) => {
-	handleChange(newValue);
+	props.handleChange(newValue);
 });
 
 watch(value, (newValue) => {
