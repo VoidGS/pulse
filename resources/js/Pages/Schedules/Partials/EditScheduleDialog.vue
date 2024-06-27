@@ -182,7 +182,7 @@ watch(() => editScheduleDialogState.open, (newOpenState) => {
 				</div>
 
 				<DialogFooter>
-					<template v-if="editScheduleDialogState.schedule?.recurrence_id">
+					<template v-if="!editScheduleDialogState.schedule?.recurrence_id">
 						<Button @click="submitType = 0" type="submit">
 							Salvar
 						</Button>

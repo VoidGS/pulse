@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->dateTime('end_date');
             $table->enum('status', ['pendente', 'confirmado', 'cancelado', 'remarcado', 'finalizado', 'faltou']);
             $table->boolean('active')->default(true);
-            $table->string('event_id');
+            $table->string('event_id')->nullable();
             $table->string('recurrence_id')->nullable();
             $table->timestamps();
         });

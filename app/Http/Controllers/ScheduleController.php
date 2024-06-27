@@ -125,29 +125,32 @@ class ScheduleController extends Controller {
                 'submitType' => ['required', 'integer']
             ]);
 
-            $event = Event::find($schedule->event_id);
+            // $event = Event::find($schedule->event_id);
+            //
+            // if ($event->status == 'cancelled') {
+            //     return to_route('schedules.index')->toastDanger('Este agendamento não existe mais no Google Agenda. É recomendado que inative o agendamento.');
+            // }
+            //
+            // $statusName = strtoupper($data['status']);
+            // $eventColodId = constant("\App\Enums\ScheduleStatusColor::{$statusName}")->value;
+            //
+            // $event->setColorId($eventColodId);
+            // $event->update([
+            //     'startDateTime' => Carbon::createFromDate($data['scheduleDate']),
+            //     'endDateTime' => Carbon::createFromDate($data['scheduleDate'])->addHour(),
+            // ]);
+            //
+            // $updateData = [
+            //     'customer_id' => $data['customerId'],
+            //     'service_id' => $data['serviceId'],
+            //     'start_date' => Carbon::createFromDate($data['scheduleDate'])->setTimezone('America/Sao_Paulo'),
+            //     'end_date' => Carbon::createFromDate($data['scheduleDate'])->addHour()->setTimezone('America/Sao_Paulo'),
+            //     'status' => ScheduleStatus::from($data['status'])->value,
+            // ];
+            // $schedule->update($updateData);
 
-            if ($event->status == 'cancelled') {
-                return to_route('schedules.index')->toastDanger('Este agendamento não existe mais no Google Agenda. É recomendado que inative o agendamento.');
-            }
-
-            $statusName = strtoupper($data['status']);
-            $eventColodId = constant("\App\Enums\ScheduleStatusColor::{$statusName}")->value;
-
-            $event->setColorId($eventColodId);
-            $event->update([
-                'startDateTime' => Carbon::createFromDate($data['scheduleDate']),
-                'endDateTime' => Carbon::createFromDate($data['scheduleDate'])->addHour(),
-            ]);
-
-            $updateData = [
-                'customer_id' => $data['customerId'],
-                'service_id' => $data['serviceId'],
-                'start_date' => Carbon::createFromDate($data['scheduleDate'])->setTimezone('America/Sao_Paulo'),
-                'end_date' => Carbon::createFromDate($data['scheduleDate'])->addHour()->setTimezone('America/Sao_Paulo'),
-                'status' => ScheduleStatus::from($data['status'])->value,
-            ];
-            $schedule->update($updateData);
+            $submitType = $data['submitType'];
+            SchedulesHelper::updateSchedule($schedule, $data, $submitType);
 
             DB::commit();
 
