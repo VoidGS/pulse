@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Enums\ScheduleStatus;
 use App\Enums\ScheduleStatusColor;
 use App\Jobs\CreateEvent;
+use App\Jobs\UpdateEvent;
 use App\Models\Customer;
 use App\Models\Schedule;
 use App\Models\Service;
@@ -39,7 +40,6 @@ class SchedulesHelper {
         $customer = Customer::find($item['customer_id']);
         $service = Service::find($item['service_id']);
         $mainRecurrenceId = $mainRecurrenceScheduleId;
-        $recurrenceId = null;
 
         if ($fromRecurrenceFunc) {
             $startDate = Carbon::createFromDate($item['start_date'])->addWeeks($index);
@@ -55,11 +55,6 @@ class SchedulesHelper {
         $recurrenceEvent->startDateTime = $startDate;
         $recurrenceEvent->endDateTime = $endDate;
         $recurrenceEvent->setColorId(ScheduleStatusColor::PENDENTE->value);
-        // $newRecurrenceEvent = $recurrenceEvent->save();
-
-        // if (!$fromRecurrenceFunc && $item['hasRecurrence']) {
-        //     $recurrenceId = $newRecurrenceEvent->id;
-        // }
 
         $recurrenceSchedule = new Schedule();
         $recurrenceSchedule->customer_id = $item['customer_id'];
@@ -67,8 +62,6 @@ class SchedulesHelper {
         $recurrenceSchedule->start_date = $startDate->setTimezone('America/Sao_Paulo');
         $recurrenceSchedule->end_date = $endDate->setTimezone('America/Sao_Paulo');
         $recurrenceSchedule->status = ScheduleStatus::PENDENTE;
-        // $recurrenceSchedule->event_id = $newRecurrenceEvent->id;
-        // $recurrenceSchedule->recurrence_id = $recurrenceId;
         $recurrenceSchedule->save();
 
         if (!$mainRecurrenceId && !$fromRecurrenceFunc && $item['hasRecurrence']) {
@@ -82,18 +75,15 @@ class SchedulesHelper {
         }
     }
 
-    public static function updateSchedule(Schedule $schedule,
-        mixed $updateData,
-        int|null $submitType = null,
-        int $index = null): \Illuminate\Http\RedirectResponse|bool {
-        if ($submitType === 1) {
+    public static function updateSchedule(Schedule $schedule, mixed $updateData, int|null $submitType = null, int $index = null): \Illuminate\Http\RedirectResponse|bool {
+        if ($submitType === 1 && $updateData['hasRecurrence']) {
             self::updateAllSchedulesFromThisRecurrence($schedule, $updateData);
         }
 
-        $event = Event::find($schedule->event_id);
         $service = Service::find($updateData['serviceId']);
         $startDate = Carbon::createFromDate($updateData['scheduleDate']);
         $endDate = Carbon::createFromDate($updateData['scheduleDate'])->addMinutes($service->duration);
+        $shouldRemoveRecurrence = !$updateData['hasRecurrence'] && $schedule->recurrence_id;
 
         if ($index) {
             $startDate = $index > 0 ? Carbon::createFromDate($updateData['scheduleDate'])->addWeeks($index) :
@@ -101,19 +91,6 @@ class SchedulesHelper {
             $endDate = $index > 0 ? Carbon::createFromDate($updateData['scheduleDate'])->addWeeks($index)->addMinutes($service->duration) :
                 Carbon::createFromDate($updateData['scheduleDate'])->subWeeks($index * -1);
         }
-
-        if ($event->status == 'cancelled') {
-            return to_route('schedules.index')->toastDanger('Este agendamento não existe mais no Google Agenda. É recomendado que inative o agendamento.');
-        }
-
-        $statusName = strtoupper($updateData['status']);
-        $eventColodId = constant("\App\Enums\ScheduleStatusColor::{$statusName}")->value;
-
-        $event->setColorId($eventColodId);
-        $event->update([
-            'startDateTime' => $startDate,
-            'endDateTime' => $endDate,
-        ]);
 
         $updateSchedule = [
             'customer_id' => $updateData['customerId'],
@@ -123,6 +100,18 @@ class SchedulesHelper {
             'status' => ScheduleStatus::tryFrom($updateData['status'])->value,
         ];
         $schedule->update($updateSchedule);
+
+        if ($shouldRemoveRecurrence) {
+            self::removeRecurrence($schedule);
+            $schedule->update(['recurrence_id' => null]);
+        }
+
+        UpdateEvent::dispatchAfterResponse($schedule, $startDate, $endDate, $shouldRemoveRecurrence);
+
+        if ($updateData['hasRecurrence'] && !$schedule->recurrence_id) {
+            self::generateFutureSchedulesRecurrence($schedule, $schedule->id);
+            $schedule->update(['recurrence_id' => $schedule->event_id]);
+        }
 
         if ($submitType === 2) {
             self::updateNextSchedules($schedule, $updateData);
@@ -162,6 +151,16 @@ class SchedulesHelper {
 
         foreach ($previousSchedules as $previousKey => $previousItem) {
             self::updateSchedule($previousItem, $updateData, null, ($previousKey + 1) * -1);
+        }
+    }
+
+    public static function removeRecurrence(Schedule $schedule): void {
+        $childSchedules = Schedule::where(['recurrence_id' => $schedule->recurrence_id, 'active' => true])
+            ->where('event_id', '<>', $schedule->event_id)
+            ->get();
+
+        foreach ($childSchedules as $item) {
+            $item->update(['active' => false]);
         }
     }
 }
