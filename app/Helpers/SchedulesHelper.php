@@ -13,6 +13,86 @@ use Carbon\Carbon;
 use Spatie\GoogleCalendar\Event;
 
 class SchedulesHelper {
+    /**
+     * @throws \Exception
+     */
+    public static function verifySchedulesConflict(mixed $item, Schedule|null $schedule = null): void {
+        $hasRecurrence = ($item['hasRecurrence']);
+        $service = Service::find($item['service_id']);
+
+        if (!$hasRecurrence) {
+            $startDate = Carbon::createFromDate($item['start_date'])->setTimezone('America/Sao_Paulo');
+            $endDate = Carbon::createFromDate($item['start_date'])->addMinutes($service->duration)->setTimezone('America/Sao_Paulo');
+            self::checkValidScheduleDate($startDate, $endDate, $service->id, $schedule);
+            return;
+        }
+
+        $arrSchedule = [];
+        $loopCount = 0;
+        if ($schedule) {
+            $arrSchedule = Schedule::where(['recurrence_id' => $schedule->recurrence_id, 'active' => true])
+                ->whereNotNull('recurrence_id')
+                ->orderBy('start_date')
+                ->get();
+
+            $loopCount = count($arrSchedule);
+        }
+
+        if ($loopCount < 2) {
+            $loopCount = 5;
+        }
+
+        $i = 0;
+        while ($i < $loopCount) {
+            $startDate = Carbon::createFromDate($item['start_date'])->addWeeks($i)->setTimezone('America/Sao_Paulo');
+            $endDate = Carbon::createFromDate($item['start_date'])->addMinutes($service->duration)->addWeeks($i)->setTimezone('America/Sao_Paulo');
+
+            $itemSchedule = isset($arrSchedule[$i]) ? $arrSchedule[$i] : null;
+            self::checkValidScheduleDate($startDate, $endDate, $service->id, $itemSchedule);
+
+            $i++;
+        }
+        return;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function checkValidScheduleDate(Carbon $startDate, Carbon $endDate, int $serviceId, Schedule|null $schedule = null): void {
+        $scheduleId = $schedule?->id;
+
+        $conflictingSchedules = Schedule::where(['service_id' => $serviceId, 'active' => true])
+            ->where('id', '!=', $scheduleId)
+            ->where(function ($query) use ($schedule) {
+                if ($schedule) {
+                    $query->where('recurrence_id', '!=', $schedule->recurrence_id)
+                        ->orWhereNull('recurrence_id');
+                }
+            })
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate]);
+                })
+                ->orWhere(function ($query) use ($startDate, $endDate) {
+                    $query->where('start_date', '<', $startDate)
+                        ->where('end_date', '>', $endDate);
+                });
+            })
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->where('end_date', '!=', $startDate)
+                    ->where('start_date', '!=', $endDate);
+            })
+            ->exists();
+
+        if ($conflictingSchedules) {
+            throw new \Exception('O agendamento conflita com outro agendamento existente', 600);
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
     public static function generateFutureSchedulesRecurrence(Schedule|null $schedule = null, int|null $mainRecurrenceScheduleId = null): void {
         $schedules = [];
         if (!$schedule) {
@@ -36,6 +116,9 @@ class SchedulesHelper {
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function createSchedule(mixed $item, bool $fromRecurrenceFunc = false, int|null $index = null, int|null $mainRecurrenceScheduleId = null): void {
         $customer = Customer::find($item['customer_id']);
         $service = Service::find($item['service_id']);
@@ -48,6 +131,7 @@ class SchedulesHelper {
         } else {
             $startDate = Carbon::createFromDate($item['start_date']);
             $endDate = Carbon::createFromDate($item['start_date'])->addMinutes($service->duration);
+            self::verifySchedulesConflict($item);
         }
 
         $recurrenceEvent = new Event();
@@ -75,7 +159,17 @@ class SchedulesHelper {
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function updateSchedule(Schedule $schedule, mixed $updateData, int|null $submitType = null, int $index = null): \Illuminate\Http\RedirectResponse|bool {
+        if (!$index) {
+            $item = $updateData;
+            $item['service_id'] = $item['serviceId'];
+            $item['start_date'] = $item['scheduleDate'];
+            self::verifySchedulesConflict($item, $schedule);
+        }
+
         if ($submitType === 1 && $updateData['hasRecurrence']) {
             self::updateAllSchedulesFromThisRecurrence($schedule, $updateData);
         }
@@ -120,6 +214,9 @@ class SchedulesHelper {
         return true;
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function updateNextSchedules(Schedule $schedule, mixed $updateData): void {
         $nextSchedules = Schedule::where(['recurrence_id' => $schedule->recurrence_id, 'active' => true])
             ->whereDate('start_date', '>=', Carbon::createFromDate($updateData['scheduleDate']))
@@ -132,6 +229,9 @@ class SchedulesHelper {
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function updateAllSchedulesFromThisRecurrence(Schedule $schedule, mixed $updateData): void {
         $nextSchedules = Schedule::where(['recurrence_id' => $schedule->recurrence_id, 'active' => true])
             ->whereDate('start_date', '>=', Carbon::createFromDate($schedule->start_date))
