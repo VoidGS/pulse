@@ -128,14 +128,19 @@ class ScheduleController extends Controller {
      * Remove the specified resource from storage.
      */
     public function destroy(Schedule $schedule) {
-        $event = Event::find($schedule->event_id);
+        try {
+            DB::beginTransaction();
 
-        if ($event->status !== 'cancelled') {
-            $event->delete();
+            SchedulesHelper::inactivateSchedule($schedule);
+
+            DB::commit();
+
+            return to_route('schedules.index')->toastSuccess('Agendamento inativado com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // throw $e;
+
+            return to_route('schedules.index')->toastDanger('Ocorreu um erro no servidor.');
         }
-
-        $schedule->update(['active' => false]);
-
-        return to_route('schedules.index')->toastSuccess('Agendamento inativado com sucesso!');
     }
 }

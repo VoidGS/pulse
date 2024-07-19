@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Enums\ScheduleStatus;
 use App\Enums\ScheduleStatusColor;
 use App\Jobs\CreateEvent;
+use App\Jobs\InactivateEvent;
 use App\Jobs\UpdateEvent;
 use App\Models\Customer;
 use App\Models\Schedule;
@@ -262,5 +263,11 @@ class SchedulesHelper {
         foreach ($childSchedules as $item) {
             $item->update(['active' => false]);
         }
+    }
+
+    public static function inactivateSchedule(Schedule $schedule): void {
+        InactivateEvent::dispatchAfterResponse($schedule->event_id);
+
+        $schedule->update(['active' => false]);
     }
 }
