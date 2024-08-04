@@ -35,6 +35,10 @@ const props = defineProps<{
 	services: Service[],
 }>()
 
+const emit = defineEmits<{
+	(e: 'filter'): void
+}>()
+
 const calendarValue = ref('')
 const statusValue = ref<ScheduleStatus | undefined>()
 
@@ -72,6 +76,9 @@ const onSubmit = handleSubmit((formValues) => {
 		onSuccess: () => {
 			resetForm()
 			editScheduleDialogState.open = false
+		},
+		onFinish: () => {
+			emit('filter')
 		},
 	})
 })

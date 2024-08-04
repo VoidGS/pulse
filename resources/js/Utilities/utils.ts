@@ -1,5 +1,6 @@
 import axios from "axios";
 import { route } from "momentum-trail";
+import type { Schedule, ScheduleFilter } from "@/Pages/Schedules/Data/schema";
 
 function formatCPF(cpf: string) {
     cpf = cpf.replace(/\D/g, "")
@@ -39,10 +40,22 @@ function validatePhone(phone: string) {
     return phone.match('^((1[1-9])|([2-9][0-9]))((3[0-9]{3}[0-9]{4})|(9[0-9]{3}[0-9]{5}))$')
 }
 
+async function filterSchedules(filterOption: ScheduleFilter): Promise<Schedule[]> {
+    return await axios.get(route('schedules.filter'), {
+        params: filterOption
+    }).then((response) => {
+        console.log(response.data)
+        return response.data
+    }).catch((error) => {
+        console.log(error)
+    })
+}
+
 export {
     formatCPF,
     validateCPF,
     validateServerGuardianCPF,
     unmaskCPF,
-    validatePhone
+    validatePhone,
+    filterSchedules
 }

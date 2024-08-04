@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Enums\ScheduleStatus;
 use App\Enums\ScheduleStatusColor;
+use App\Http\Resources\ScheduleResource;
 use App\Jobs\CreateEvent;
 use App\Jobs\InactivateEvent;
 use App\Jobs\UpdateEvent;
@@ -266,8 +267,20 @@ class SchedulesHelper {
     }
 
     public static function inactivateSchedule(Schedule $schedule): void {
-        InactivateEvent::dispatchAfterResponse($schedule->event_id);
-
         $schedule->update(['active' => false]);
+        InactivateEvent::dispatchAfterResponse($schedule->event_id);
+    }
+
+    public static function filterSchedules(mixed $filterOptions): \Illuminate\Http\Resources\Json\AnonymousResourceCollection {
+        $scheduleQuery = Schedule::with(['customer', 'service']);
+
+        if (isset($filterOptions['scheduleDate'])) $scheduleQuery->whereDay('start_date', Carbon::createFromDate($filterOptions['scheduleDate'])->day);
+        if (isset($filterOptions['customerId'])) $scheduleQuery->where('customer_id', $filterOptions['customerId']);
+        if (isset($filterOptions['serviceId'])) $scheduleQuery->where('service_id', $filterOptions['serviceId']);
+        if (isset($filterOptions['status'])) $scheduleQuery->where('status', $filterOptions['status']);
+
+        $scheduleQuery->where(['active' => true]);
+
+        return ScheduleResource::collection($scheduleQuery->orderBy('start_date', 'asc')->limit(50)->get());
     }
 }

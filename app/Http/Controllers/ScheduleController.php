@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ScheduleStatus;
-use App\Enums\ScheduleStatusColor;
 use App\Helpers\SchedulesHelper;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\ScheduleResource;
@@ -14,7 +12,6 @@ use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Spatie\GoogleCalendar\Event;
 
 class ScheduleController extends Controller {
     public function __construct() {
@@ -26,10 +23,27 @@ class ScheduleController extends Controller {
      */
     public function index() {
         return inertia('Schedules/Index', [
-            'schedules' => fn () => ScheduleResource::collection(Schedule::with(['customer', 'service'])->where('active', true)->orderBy('start_date', 'asc')->get()),
+            'schedules' => fn () => SchedulesHelper::filterSchedules(['scheduleDate' => Carbon::now()->setTimezone('America/Sao_Paulo')]),
             'customers' => fn () => CustomerResource::collection(Customer::with(['guardians', 'discounts'])->where('active', true)->get()),
             'services' => fn () => ServiceResource::collection(Service::with(['user', 'team'])->where('active', true)->get()),
         ]);
+    }
+
+    public function filter(Request $request) {
+        $data = $request->validate([
+            'scheduleDate' => ['date'],
+            'customerId' => ['numeric', 'exists:customers,id'],
+            'serviceId' => ['numeric', 'exists:services,id'],
+            'status' => ['string'],
+        ]);
+
+        $filterOptions = [];
+        $filterOptions['scheduleDate'] = $request->query('scheduleDate');
+        $filterOptions['customerId'] = $request->query('customerId');
+        $filterOptions['serviceId'] = $request->query('serviceId');
+        $filterOptions['status'] = $request->query('status');
+
+        return SchedulesHelper::filterSchedules($filterOptions);
     }
 
     /**

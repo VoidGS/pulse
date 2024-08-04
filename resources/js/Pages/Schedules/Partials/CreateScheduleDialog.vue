@@ -22,6 +22,10 @@ const props = defineProps<{
 	services: Service[],
 }>()
 
+const emit = defineEmits<{
+	(e: 'filter'): void
+}>()
+
 const openCreateScheduleDialog = ref(false)
 
 const calendarValue = ref('')
@@ -49,12 +53,16 @@ const onSubmit = handleSubmit((formValues) => {
 	const form = inertiaUseForm(formValues)
 	form.post(route('schedules.store'), {
 		preserveScroll: true,
+		preserveState: true,
 		onError: (errors) => {
 			setErrors(errors)
 		},
 		onSuccess: () => {
 			resetForm()
 			openCreateScheduleDialog.value = false
+		},
+		onFinish: () => {
+			emit('filter')
 		},
 	})
 })

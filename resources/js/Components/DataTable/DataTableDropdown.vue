@@ -7,9 +7,9 @@ import { type Component, type HTMLAttributes, ref } from "vue";
 import {
 	Dialog,
 	DialogClose,
-	DialogContent,
+	DialogContent, DialogDescription,
 	DialogFooter,
-	DialogHeader,
+	DialogHeader, DialogTitle,
 	DialogTrigger
 } from "@/Components/ui/dialog";
 import PoliceCarLight from "@/Components/Emojis/PoliceCarLight.vue";
@@ -89,25 +89,22 @@ function copy(id: string) {
 							<DialogContent>
 								<DialogHeader>
 									<div class="md:flex md:items-center">
-										<div
-											class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 md:mx-0 md:h-10 md:w-10">
+										<div class="mx-auto shrink-0 flex items-center justify-center self-start h-12 w-12 rounded-full bg-red-100 md:mx-0 md:h-10 md:w-10">
 											<PoliceCarLight class="w-6 h-6"/>
 										</div>
 
 										<div class="mt-3 text-center md:mt-0 md:ms-4 md:text-start">
 											<h2 class="text-lg font-semibold leading-none tracking-tight">
-												{{ item.deleteDialog.title }}
+												<DialogTitle>{{ item.deleteDialog.title }}</DialogTitle>
 											</h2>
-										</div>
-									</div>
 
-									<div class="md:ml-14">
-										<div class="mt-3 md:mt-0 text-sm text-gray-600 dark:text-gray-400">
-											<p class="text-sm text-muted-foreground">{{ item.deleteDialog.description }}</p>
+											<p class="text-sm text-muted-foreground mt-1">
+												<DialogDescription>{{ item.deleteDialog.description }}</DialogDescription>
+											</p>
 										</div>
 									</div>
 								</DialogHeader>
-								<DialogFooter class="grid mt-4 gap-3 md:flex">
+								<DialogFooter class="grid mt-1 gap-3 md:flex">
 									<DialogClose as-child>
 										<Button type="button" variant="secondary">
 											Cancelar

@@ -18,6 +18,13 @@ export interface Schedule {
     }
 }
 
+export interface ScheduleFilter {
+    scheduleDate?: Date
+    customerId?: number
+    serviceId?: number
+    status?: ScheduleStatus
+}
+
 export enum ScheduleStatus {
     PENDENTE = "pendente",
     CONFIRMADO = "confirmado",

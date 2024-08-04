@@ -46,4 +46,5 @@ Route::middleware([
     Route::resource('guardians', GuardianController::class)->only(['index']);
 
     Route::resource('schedules', ScheduleController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    Route::get('schedules/filter', [ScheduleController::class, 'filter'])->name('schedules.filter');
 });

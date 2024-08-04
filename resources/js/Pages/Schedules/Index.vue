@@ -5,11 +5,11 @@ import TearOffCalendar from "@/Components/Emojis/TearOffCalendar.vue";
 import { Button } from "@/Components/ui/button";
 import { CalendarCog, Circle, Eraser, Trash } from "lucide-vue-next";
 import { Calendar } from "@/Components/ui/v-calendar";
-import { h, type Ref, ref } from "vue";
+import { type Ref, ref, watch } from "vue";
 import { type DateValue, getLocalTimeZone, today } from "@internationalized/date";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/Components/ui/form";
+import { FormField, FormItem, FormLabel, FormMessage } from "@/Components/ui/form";
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import Combobox from "@/Components/Combobox.vue";
 import type { Customer } from "@/Pages/Customers/Data/schema";
@@ -21,11 +21,15 @@ import { type Schedule, ScheduleBorderStatusColor, ScheduleSelectStatusColor, Sc
 import { Avatar, AvatarImage } from "@/Components/ui/avatar";
 import { displayScheduleDates } from "@/Utilities/date";
 import DropdownAction, { type DataTableActionItem } from "@/Components/DataTable/DataTableDropdown.vue";
-import { usePage, Link, useForm } from "@inertiajs/vue3";
+import { useForm } from "vee-validate";
+import { Link, usePage, useForm as useInertiaForm } from "@inertiajs/vue3";
 import EditScheduleDialog from "@/Pages/Schedules/Partials/EditScheduleDialog.vue";
 import { useEditScheduleDialog } from "@/Pages/Schedules/Composables/useEditScheduleDialog";
 import { route } from "momentum-trail";
 import { Badge } from "@/Components/ui/badge";
+import { toTypedSchema } from "@vee-validate/zod";
+import { z } from '@/lib/pt-zod';
+import { filterSchedules } from "@/Utilities/utils";
 
 const props = defineProps<{
 	schedules: Schedule[],
@@ -33,33 +37,75 @@ const props = defineProps<{
 	services: Service[]
 }>()
 
+const schedules = ref<Schedule[]>(props.schedules)
 const customerValue = ref('')
 const serviceValue = ref('')
 const statusValue = ref<ScheduleStatus | undefined>()
+const clearingFilter = ref(false)
 
 const calendarValue = ref(today(getLocalTimeZone())) as Ref<DateValue>
 
 const form = useForm({});
+const inertiaForm = useInertiaForm({})
 
 const { editScheduleDialogState, openDialog } = useEditScheduleDialog()
 
+const filterScheduleSchema = toTypedSchema(z.object({
+	scheduleDate: z.coerce.date().optional(),
+	customerId: z.coerce.number({ invalid_type_error: "Escolha um cliente" }).positive('Escolha um cliente').optional(),
+	serviceId: z.coerce.number({ invalid_type_error: "Escolha um serviço" }).positive('Escolha um serviço').optional(),
+	status: z.nativeEnum(ScheduleStatus).optional(),
+}))
+
+const { values, setValues, handleSubmit, resetForm } = useForm({
+	initialValues: {
+		scheduleDate: new Date(),
+		customerId: undefined,
+		serviceId: undefined,
+		status: undefined
+	},
+	validationSchema: filterScheduleSchema
+})
+
+const onSubmit = handleSubmit(async (formValues) => {
+	schedules.value = await filterSchedules((formValues))
+})
+
 const clearFilterOptions = () => {
+	clearingFilter.value = true
+
+	calendarValue.value = today(getLocalTimeZone())
 	customerValue.value = ''
 	serviceValue.value = ''
 	statusValue.value = undefined
+
+	clearingFilter.value = false
+	resetForm();
 }
 
-const customersSetValue = (value) => customerValue.value = value
+const customersSetValue = (value) => {
+	customerValue.value = value
+	setValues({ customerId: value })
+}
 const customersComboboxArrayKeys = { id: 'id', label: 'name' }
 const customersComboboxOptions = { searchMessage: 'Pesquise um cliente', selectMessage: 'Selecione o cliente' }
 
-const servicesSetValue = (value) => serviceValue.value = value
+const servicesSetValue = (value) => {
+	serviceValue.value = value
+	setValues({ serviceId: value })
+}
 const servicesComboboxArrayKeys = { id: 'id', label: 'name' }
 const servicesComboboxOptions = { searchMessage: 'Pesquise um serviço', selectMessage: 'Selecione o serviço' }
 
-const getStatusColor = (prefix, status) => {
-	return
-}
+watch(calendarValue, async (newCalendarValue) => {
+	let newDate = newCalendarValue ? new Date(newCalendarValue.toString()) : undefined
+	setValues({ scheduleDate: newDate })
+})
+
+watch(values, async (newValues) => {
+	if (clearingFilter.value == true) return
+	await onSubmit()
+})
 </script>
 
 <template>
@@ -80,83 +126,90 @@ const getStatusColor = (prefix, status) => {
 					</div>
 
 					<div>
-						<CreateScheduleDialog :customers="props.customers" :services="props.services" />
+						<CreateScheduleDialog @filter="onSubmit" :customers="props.customers" :services="props.services" />
 					</div>
 				</div>
 			</div>
 
-			<EditScheduleDialog :customers="props.customers" :services="props.services" />
+			<EditScheduleDialog @filter="onSubmit" :customers="props.customers" :services="props.services" />
 
 			<div class="pt-4 space-y-6">
 				<div class="grid gap-6">
-					<div class="grid grid-cols-1 lg:grid-cols-3 gap-y-6 lg:gap-x-6">
-						<Calendar v-model="calendarValue" locale="pt-BR" timezone="America/Sao_Paulo" class="rounded-lg border shadow-sm" />
+					<form @submit="onSubmit">
+						<div class="grid grid-cols-1 lg:grid-cols-3 gap-y-6 lg:gap-x-6">
+							<FormField v-slot="{ componentField }" name="scheduleDate">
+								<FormItem v-auto-animate>
+									<Calendar v-model="calendarValue" locale="pt-BR" timezone="America/Sao_Paulo" class="rounded-lg border shadow-sm" />
+									<FormMessage/>
+								</FormItem>
+							</FormField>
 
-						<Card class="col-span-2">
-							<CardHeader class="flex md:flex-row md:items-center space-y-2 md:space-y-0">
-								<div class="grid">
-									<CardTitle class="text-xl">Filtrar agendamentos</CardTitle>
-								</div>
-								<Button as-child @click="clearFilterOptions" variant="secondary" size="sm" class="md:ml-auto gap-2">
-									<Link href="#" preserve-scroll preserve-state>
-										Limpar filtros
-										<Eraser class="h-4 w-4"/>
-									</Link>
-								</Button>
-							</CardHeader>
-							<CardContent>
-								<div class="grid gap-6">
-									<div class="md:grid md:grid-cols-2 md:gap-6">
-										<FormField v-slot="{ componentField }" name="customer">
-											<FormItem v-auto-animate>
-												<FormLabel>Cliente</FormLabel>
-												<Combobox :items="props.customers"
-														  :items-keys="customersComboboxArrayKeys"
-														  :options="customersComboboxOptions"
-														  :item-selected="customerValue"
-														  :item-set-value="customersSetValue" key="testeGui"/>
-												<FormMessage/>
-											</FormItem>
-										</FormField>
-
-										<FormField v-slot="{ componentField }" name="service">
-											<FormItem v-auto-animate>
-												<FormLabel>Serviço</FormLabel>
-												<Combobox :items="props.services"
-														  :items-keys="servicesComboboxArrayKeys"
-														  :options="servicesComboboxOptions"
-														  :item-selected="serviceValue"
-														  :item-set-value="servicesSetValue"/>
-												<FormMessage/>
-											</FormItem>
-										</FormField>
+							<Card class="col-span-2">
+								<CardHeader class="flex md:flex-row md:items-center space-y-2 md:space-y-0">
+									<div class="grid">
+										<CardTitle class="text-xl">Filtrar agendamentos</CardTitle>
 									</div>
+									<Button as-child @click="clearFilterOptions" variant="secondary" size="sm" class="md:ml-auto gap-2">
+										<Link href="#" preserve-scroll preserve-state>
+											Limpar filtros
+											<Eraser class="h-4 w-4"/>
+										</Link>
+									</Button>
+								</CardHeader>
+								<CardContent>
+									<div class="grid gap-6">
+										<div class="md:grid md:grid-cols-2 md:gap-6">
+											<FormField v-slot="{ componentField }" name="customerId">
+												<FormItem v-auto-animate>
+													<FormLabel>Cliente</FormLabel>
+													<Combobox :items="props.customers"
+															  :items-keys="customersComboboxArrayKeys"
+															  :options="customersComboboxOptions"
+															  :item-selected="customerValue"
+															  :item-set-value="customersSetValue"/>
+													<FormMessage/>
+												</FormItem>
+											</FormField>
 
-									<div class="md:grid md:grid-cols-2 md:gap-6">
-										<FormField v-slot="{ componentField }" name="status">
-											<FormItem v-auto-animate>
-												<FormLabel>Status</FormLabel>
-												<Select v-bind="componentField" v-model="statusValue">
-													<SelectTrigger>
-														<SelectValue :class="cn(statusValue ? 'capitalize' : 'text-muted-foreground')" placeholder="Selecione o status" />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectItem v-for="status in ScheduleStatus" :value="status" class="capitalize">
-															<div class="flex gap-1.5 items-center">
-																<Circle :fill="ScheduleSelectStatusColor[status.toUpperCase()]" :color="ScheduleSelectStatusColor[status.toUpperCase()]" class="w-4 h-4" />
-																<span>{{ status }}</span>
-															</div>
-														</SelectItem>
-													</SelectContent>
-												</Select>
-												<FormMessage/>
-											</FormItem>
-										</FormField>
+											<FormField v-slot="{ componentField }" name="serviceId">
+												<FormItem v-auto-animate>
+													<FormLabel>Serviço</FormLabel>
+													<Combobox :items="props.services"
+															  :items-keys="servicesComboboxArrayKeys"
+															  :options="servicesComboboxOptions"
+															  :item-selected="serviceValue"
+															  :item-set-value="servicesSetValue"/>
+													<FormMessage/>
+												</FormItem>
+											</FormField>
+										</div>
+
+										<div class="md:grid md:grid-cols-2 md:gap-6">
+											<FormField v-slot="{ componentField }" name="status">
+												<FormItem v-auto-animate>
+													<FormLabel>Status</FormLabel>
+													<Select v-bind="componentField" v-model="statusValue">
+														<SelectTrigger>
+															<SelectValue :class="cn(statusValue ? 'capitalize' : 'text-muted-foreground')" placeholder="Selecione o status" />
+														</SelectTrigger>
+														<SelectContent>
+															<SelectItem v-for="status in ScheduleStatus" :value="status" class="capitalize">
+																<div class="flex gap-1.5 items-center">
+																	<Circle :fill="ScheduleSelectStatusColor[status.toUpperCase()]" :color="ScheduleSelectStatusColor[status.toUpperCase()]" class="w-4 h-4" />
+																	<span>{{ status }}</span>
+																</div>
+															</SelectItem>
+														</SelectContent>
+													</Select>
+													<FormMessage/>
+												</FormItem>
+											</FormField>
+										</div>
 									</div>
-								</div>
-							</CardContent>
-						</Card>
-					</div>
+								</CardContent>
+							</Card>
+						</div>
+					</form>
 
 					<div class="grid grid-cols-1">
 						<Card>
@@ -179,7 +232,7 @@ const getStatusColor = (prefix, status) => {
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										<TableRow v-for="schedule in props.schedules" :key="schedule.id">
+										<TableRow v-for="schedule in schedules" :key="schedule.id">
 											<TableCell>
 												<div class="font-medium">
 													{{ schedule.customer.name }}
@@ -221,7 +274,13 @@ const getStatusColor = (prefix, status) => {
 															title: 'Inativar agendamento',
 															description: 'Tem certeza que deseja inativar este agendamento?',
 															deleteActionName: 'Inativar',
-															deleteAction: () => form.delete(route('schedules.destroy', schedule), { preserveState: false })
+															deleteAction: () => inertiaForm.delete(route('schedules.destroy', schedule), {
+																preserveState: true,
+																preserveScroll: true,
+																onFinish: () => {
+																	onSubmit()
+																},
+															})
 														},
 														show: usePage<any>().props.user_permissions.delete_schedules
 													}
