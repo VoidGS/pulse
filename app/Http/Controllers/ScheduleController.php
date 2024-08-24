@@ -57,15 +57,15 @@ class ScheduleController extends Controller {
      * Store a newly created resource in storage.
      */
     public function store(Request $request) {
+        $data = $request->validate([
+            'scheduleDate' => ['required', 'date'],
+            'customerId' => ['required', 'numeric', 'exists:customers,id'],
+            'serviceId' => ['required', 'numeric', 'exists:services,id'],
+            'hasRecurrence' => ['required', 'boolean'],
+        ]);
+
         try {
             DB::beginTransaction();
-
-            $data = $request->validate([
-                'scheduleDate' => ['required', 'date'],
-                'customerId' => ['required', 'numeric', 'exists:customers,id'],
-                'serviceId' => ['required', 'numeric', 'exists:services,id'],
-                'hasRecurrence' => ['required', 'boolean'],
-            ]);
 
             $item = [
                 'start_date' => $data['scheduleDate'],

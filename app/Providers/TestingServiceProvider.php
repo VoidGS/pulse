@@ -5,8 +5,10 @@ namespace App\Providers;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Testing\Assert as PHPUnit;
 use Illuminate\Testing\TestResponse;
 use Inertia\Testing\AssertableInertia;
+use Illuminate\Http\RedirectResponse;
 
 class TestingServiceProvider extends ServiceProvider {
     /**
@@ -50,6 +52,20 @@ class TestingServiceProvider extends ServiceProvider {
 
         TestResponse::macro('assertComponent', function (string $component) {
             return $this->assertInertia(fn (AssertableInertia $inertia) => $inertia->component($component, true));
+        });
+
+        TestResponse::macro('assertFlash', function (string $flash) {
+            if (!$this->baseResponse instanceof RedirectResponse) {
+                return $this;
+            }
+
+            $session = $this->baseResponse->getSession();
+            if (!is_null($session) && $session->has('flash')) {
+                PHPUnit::assertEquals($flash, $this->session()->get('flash')['toast']);
+            }
+
+            return $this;
+
         });
     }
 }

@@ -8,9 +8,9 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Laravel\withoutExceptionHandling;
 
-    beforeEach(function () {
-       $this->seeServicesPermission = Permission::create(['name' => 'see services']);
-    });
+beforeEach(function () {
+   $this->seeServicesPermission = Permission::create(['name' => 'see services']);
+});
 
 it('requires authentication', function () {
     get(route('services.index'))->assertRedirect(route('login'));

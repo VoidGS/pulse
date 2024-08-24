@@ -14,6 +14,7 @@ beforeEach(function () {
     $this->validData = [
         'name' => 'Serviço de teste',
         'price' => 50,
+        'duration' => 60,
         'team' => Team::factory()->create()->id,
         'user' => User::factory()->create()->id,
     ];
@@ -23,7 +24,7 @@ it('requires authentication', function () {
     post(route('services.store'))->assertRedirect(route('login'));
 });
 
-it('requires create users permission', function () {
+it('requires create services permission', function () {
     $badUser = User::factory()->create();
 
     actingAs($badUser)->post(route('services.store'))->assertForbidden();
@@ -57,6 +58,7 @@ it('store a service', function () {
     assertDatabaseHas(Service::class, [
         'name' => $this->validData['name'],
         'price' => $this->validData['price'],
+        'duration' => $this->validData['duration'],
         'team_id' => $this->validData['team'],
         'user_id' => $this->validData['user'],
     ]);

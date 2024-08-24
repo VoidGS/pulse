@@ -17,6 +17,7 @@ beforeEach(function () {
     $this->validData = [
         'name' => 'Serviço de teste',
         'price' => 150,
+        'duration' => 90,
         'team' => Team::factory()->create()->id,
         'user' => $this->admUser->id,
     ];
@@ -36,6 +37,7 @@ it('can update a service', function () {
     $service = Service::factory()->create([
         'name' => 'Serviço de testes',
         'price' => 450,
+        'duration' => 60,
     ]);
 
     $newName = 'Seviço novo de teste';

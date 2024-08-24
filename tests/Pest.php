@@ -16,6 +16,11 @@ use Tests\TestCase;
 */
 
 uses(TestCase::class, LazilyRefreshDatabase::class)->in('Feature');
+uses()->group('customer')->in('Feature/Controllers/CustomerController');
+uses()->group('schedule')->in('Feature/Controllers/ScheduleController');
+uses()->group('service')->in('Feature/Controllers/ServiceController');
+uses()->group('user')->in('Feature/Controllers/UserController');
+uses()->group('jetstream')->in('Feature/Jetstream');
 
 /*
 |--------------------------------------------------------------------------
