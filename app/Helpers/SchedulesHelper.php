@@ -275,6 +275,8 @@ class SchedulesHelper {
         $scheduleQuery = Schedule::with(['customer', 'service']);
 
         if (isset($filterOptions['scheduleDate'])) $scheduleQuery->whereDay('start_date', Carbon::createFromDate($filterOptions['scheduleDate'])->day);
+        if (isset($filterOptions['month'])) $scheduleQuery->whereMonth('start_date', $filterOptions['month']);
+        if (isset($filterOptions['year'])) $scheduleQuery->whereYear('start_date', $filterOptions['year']);
         if (isset($filterOptions['customerId'])) $scheduleQuery->where('customer_id', $filterOptions['customerId']);
         if (isset($filterOptions['serviceId'])) $scheduleQuery->where('service_id', $filterOptions['serviceId']);
         if (isset($filterOptions['status'])) $scheduleQuery->where('status', $filterOptions['status']);

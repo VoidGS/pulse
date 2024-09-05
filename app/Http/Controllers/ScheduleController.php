@@ -32,6 +32,8 @@ class ScheduleController extends Controller {
     public function filter(Request $request) {
         $data = $request->validate([
             'scheduleDate' => ['date'],
+            'month' => ['numeric'],
+            'year' => ['numeric'],
             'customerId' => ['numeric', 'exists:customers,id'],
             'serviceId' => ['numeric', 'exists:services,id'],
             'status' => ['string'],
@@ -39,6 +41,8 @@ class ScheduleController extends Controller {
 
         $filterOptions = [];
         $filterOptions['scheduleDate'] = $request->query('scheduleDate');
+        $filterOptions['month'] = $request->query('month');
+        $filterOptions['year'] = $request->query('year');
         $filterOptions['customerId'] = $request->query('customerId');
         $filterOptions['serviceId'] = $request->query('serviceId');
         $filterOptions['status'] = $request->query('status');

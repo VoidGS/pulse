@@ -79,10 +79,10 @@ const vCalendarSlots = computed(() => {
 <template>
   <div class="relative">
     <div v-if="$attrs.mode !== 'time'" class="absolute flex justify-between w-full px-4 top-3 z-[1]">
-      <button :class="cn(buttonVariants({ variant: 'outline' }), 'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100')" @click="handleNav('prev')">
+      <button type="button" :class="cn(buttonVariants({ variant: 'outline' }), 'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100')" @click="handleNav('prev')">
         <ChevronLeft class="w-4 h-4" />
       </button>
-      <button :class="cn(buttonVariants({ variant: 'outline' }), 'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100')" @click="handleNav('next')">
+      <button type="button" :class="cn(buttonVariants({ variant: 'outline' }), 'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100')" @click="handleNav('next')">
         <ChevronRight class="w-4 h-4" />
       </button>
     </div>
@@ -191,6 +191,54 @@ const vCalendarSlots = computed(() => {
 }
 .calendar .vc-pane-container {
   @apply w-full relative;
+}
+.vc-container, .vc-container * {
+	@apply box-border;
+}
+.vc-day {
+	@apply relative min-h-[32px] z-[1];
+}
+.vc-day-box-center-bottom {
+	@apply flex justify-center items-end;
+}
+.vc-day-layer {
+	@apply absolute left-0 right-0 top-0 bottom-0 pointer-events-none;
+}
+.vc-dots {
+	@apply flex justify-center items-center;
+}
+.vc-dot {
+	@apply w-[5px] h-[5px] rounded-full;
+}
+.vc-popover-content-wrapper {
+	@apply absolute block outline-none z-10;
+}
+.vc-popover-content-wrapper .vc-popover-content {
+	@apply mt-3 max-w-80 bg-gray-50 p-1 border-2 border-gray-300;
+}
+.vc-day-popover-container {
+	@apply text-xs leading-5 font-medium;
+}
+.vc-day-popover-header {
+	@apply text-xs leading-5 font-semibold text-center;
+}
+.vc-day-popover-row {
+	@apply flex items-center;
+}
+.vc-day-popover-row-label {
+	@apply flex items-center grow w-max ml-[4px] mr-[4px] text-xs leading-6
+}
+.vc-popover-caret {
+	@apply content-[''] absolute block w-[12px] h-[12px] border-t-inherit border-l-inherit border-inherit z-[-1]
+}
+.vc-popover-caret.direction-bottom {
+	@apply top-0
+}
+.vc-popover-caret.align-center {
+	@apply left-1/2
+}
+.vc-popover-caret.direction-bottom.align-center {
+	@apply -translate-x-1/2 -translate-y-1/2 rotate-45
 }
 :root {
 	--vc-slide-translate: 22px;

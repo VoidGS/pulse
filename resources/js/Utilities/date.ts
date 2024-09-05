@@ -13,11 +13,12 @@ const formatServerDate = (date: any) => {
 }
 const relativeDate = (date: string) => moment(date).fromNow();
 const calendarDate = (date: string) => moment(date).format('L');
+const getDateTime = (date: string) => moment(date).format("HH:mm");
 
 const displayScheduleDates = (startDate: string, endDate: string) => {
     return moment(startDate).format('DD/MM/YYYY HH:mm') + ' - ' + moment(endDate).format('HH:mm')
 };
 
 export {
-    relativeDate, calendarDate, formatDate, formatServerDate, formatDateTime, displayScheduleDates
+    relativeDate, calendarDate, formatDate, formatServerDate, formatDateTime, displayScheduleDates, getDateTime
 }

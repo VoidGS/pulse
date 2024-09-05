@@ -20,6 +20,8 @@ export interface Schedule {
 
 export interface ScheduleFilter {
     scheduleDate?: Date
+    month?: number
+    year?: number
     customerId?: number
     serviceId?: number
     status?: ScheduleStatus
@@ -50,4 +52,11 @@ export enum ScheduleSelectStatusColor {
     REMARCADO = "#fb923c",
     FINALIZADO = "#34d399",
     FALTOU = "#dc2626"
+}
+
+export interface CalendarPopover {
+    description: string,
+    isComplete: boolean,
+    dates: Date[],
+    color: string
 }

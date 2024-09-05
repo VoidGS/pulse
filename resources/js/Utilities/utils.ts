@@ -44,7 +44,6 @@ async function filterSchedules(filterOption: ScheduleFilter): Promise<Schedule[]
     return await axios.get(route('schedules.filter'), {
         params: filterOption
     }).then((response) => {
-        console.log(response.data)
         return response.data
     }).catch((error) => {
         console.log(error)

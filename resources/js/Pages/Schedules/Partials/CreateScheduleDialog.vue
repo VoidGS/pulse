@@ -2,7 +2,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/Components/ui/dialog";
 import { Button } from "@/Components/ui/button";
 import { CalendarPlus } from "lucide-vue-next";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { Calendar } from "@/Components/ui/v-calendar";
 import { toTypedSchema } from "@vee-validate/zod";
 import { z } from '@/lib/pt-zod';
@@ -14,8 +14,11 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import type { Customer } from "@/Pages/Customers/Data/schema";
 import type { Service } from "@/Pages/Services/Data/schema";
-import { formatDateTime } from "@/Utilities/date";
+import { formatDateTime, getDateTime } from "@/Utilities/date";
 import { Checkbox } from "@/Components/ui/checkbox";
+import { filterSchedules } from "@/Utilities/utils";
+import type { CalendarPopover } from "@/Pages/Schedules/Data/schema";
+import type { Page } from "v-calendar/dist/types/src/utils/page";
 
 const props = defineProps<{
 	customers: Customer[],
@@ -25,6 +28,27 @@ const props = defineProps<{
 const emit = defineEmits<{
 	(e: 'filter'): void
 }>()
+
+const currentMonth = ref<number>()
+const currentCalendarPage = ref<Page>({})
+const calendarPops = ref<CalendarPopover[]>([])
+
+const attributes = computed(() => [
+	...calendarPops.value.map(popover => ({
+		dates: popover.dates,
+		dot: {
+			style: {
+				backgroundColor: popover.color,
+		  	},
+			...(popover.isComplete && { class: 'opacity-75' }),
+		},
+		popover: {
+			label: popover.description,
+			visibility: 'hover',
+			hideIndicator: true
+		}
+	}))
+])
 
 const openCreateScheduleDialog = ref(false)
 
@@ -45,7 +69,13 @@ const customersDialogSetValue = (value) => setValues({ customerId: value })
 const customersDialogComboboxArrayKeys = { id: 'id', label: 'name' }
 const customersDialogComboboxOptions = { searchMessage: 'Pesquise um cliente', selectMessage: 'Selecione o cliente' }
 
-const servicesDialogSetValue = (value) => setValues({ serviceId: value })
+const servicesDialogSetValue = (value) => {
+	setValues({ serviceId: value })
+
+	if (currentCalendarPage) {
+		addCalendarPopover(currentCalendarPage.value)
+	}
+}
 const servicesDialogComboboxArrayKeys = { id: 'id', label: 'name' }
 const servicesDialogComboboxOptions = { searchMessage: 'Pesquise um serviço', selectMessage: 'Selecione o serviço' }
 
@@ -66,6 +96,32 @@ const onSubmit = handleSubmit((formValues) => {
 		},
 	})
 })
+
+const addCalendarPopover = async (page: Page) => {
+	if (!page) return
+
+	let schedulesFiltered = await filterSchedules({ month: page.month, year: page.year, serviceId: values.serviceId })
+
+	calendarPops.value = []
+	schedulesFiltered.forEach((schedule) => {
+		calendarPops.value.push({
+			description: getDateTime(schedule.start_date) + '/' + getDateTime(schedule.end_date) + ' ' + schedule.customer.name + ' (' + schedule.service.name + ')',
+			isComplete: false,
+			dates: [new Date(schedule.start_date)],
+			color: '#dc2626'
+		})
+	})
+}
+
+const calendarMovePage = async (event: Page[]) => {
+	let page = event[0]
+
+	if (page.month === currentMonth.value) return
+
+	currentMonth.value = page.month
+	currentCalendarPage.value = page
+	await addCalendarPopover(page)
+}
 
 watch(calendarValue, async (newCalendarValue) => {
 	setValues({ scheduleDate: formatDateTime(newCalendarValue.toString()) })
@@ -121,7 +177,7 @@ watch(calendarValue, async (newCalendarValue) => {
 						<FormField v-slot="{ componentField }" name="scheduleDate">
 							<FormItem v-auto-animate>
 								<FormLabel>Dia/Hora do agendamento</FormLabel>
-								<Calendar v-model.string="calendarValue" mode="datetime" :masks="{ modelValue: 'YYYY-MM-DD HH:mm:ss' }" is24hr locale="pt-BR" timezone="America/Sao_Paulo" class="rounded-lg border shadow-sm" key="scheduleDate" />
+								<Calendar v-model.string="calendarValue" mode="datetime" @update:pages="calendarMovePage" :attributes="attributes" :masks="{ modelValue: 'YYYY-MM-DD HH:mm:ss' }" is24hr locale="pt-BR" timezone="America/Sao_Paulo" class="rounded-lg border shadow-sm" key="scheduleDate" />
 								<FormMessage/>
 							</FormItem>
 						</FormField>
