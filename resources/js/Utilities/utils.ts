@@ -50,11 +50,38 @@ async function filterSchedules(filterOption: ScheduleFilter): Promise<Schedule[]
     })
 }
 
+function translateMonth(mesAno: string): string {
+    const meses = {
+        Jan: 'Jan',
+        Feb: 'Fev',
+        Mar: 'Mar',
+        Apr: 'Abr',
+        May: 'Mai',
+        Jun: 'Jun',
+        Jul: 'Jul',
+        Aug: 'Ago',
+        Sep: 'Set',
+        Oct: 'Out',
+        Nov: 'Nov',
+        Dec: 'Dez'
+    }
+
+    for (const mesIngles in meses) {
+        if (mesAno.includes(mesIngles)) {
+            const mesTraduzido = meses[mesIngles as keyof typeof meses]
+            return mesAno.replace(mesIngles, mesTraduzido)
+        }
+    }
+
+    return mesAno
+}
+
 export {
     formatCPF,
     validateCPF,
     validateServerGuardianCPF,
     unmaskCPF,
     validatePhone,
-    filterSchedules
+    filterSchedules,
+    translateMonth
 }

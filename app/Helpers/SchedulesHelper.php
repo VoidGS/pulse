@@ -274,7 +274,7 @@ class SchedulesHelper {
     public static function filterSchedules(mixed $filterOptions): \Illuminate\Http\Resources\Json\AnonymousResourceCollection {
         $scheduleQuery = Schedule::with(['customer', 'service']);
 
-        if (isset($filterOptions['scheduleDate'])) $scheduleQuery->whereDay('start_date', Carbon::createFromDate($filterOptions['scheduleDate'])->day);
+        if (isset($filterOptions['scheduleDate'])) $scheduleQuery->whereDate('start_date', Carbon::createFromDate($filterOptions['scheduleDate']));
         if (isset($filterOptions['month'])) $scheduleQuery->whereMonth('start_date', $filterOptions['month']);
         if (isset($filterOptions['year'])) $scheduleQuery->whereYear('start_date', $filterOptions['year']);
         if (isset($filterOptions['customerId'])) $scheduleQuery->where('customer_id', $filterOptions['customerId']);

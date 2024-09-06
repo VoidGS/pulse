@@ -51,7 +51,7 @@ export const columns: ColumnDef<Service>[] = [
                 title: 'Valor',
             })
         },
-        cell: ({ row }) => h('div', { class: "text-green-700" }, 'R$ ' + row.getValue('price')),
+        cell: ({ row }) => h('div', { class: "text-green-700" }, parseFloat(row.getValue('price')).toLocaleString('pt-BR', { style: "currency", currency: "BRL" })),
     },
     {
         accessorKey: 'duration',
