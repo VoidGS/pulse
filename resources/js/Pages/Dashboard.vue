@@ -10,7 +10,8 @@ import { translateMonth } from "@/Utilities/utils";
 const props = defineProps<{
 	chartData: any[],
 	projection: number,
-	newCustomers: number
+	newCustomers: number,
+	monthlySchedules: number
 }>()
 
 const translatedChartData = props.chartData.map((month) => {
@@ -82,7 +83,7 @@ const chartCategories: any[] = Array.from(translatedChartData.reduce((acc, item)
 						</CardHeader>
 						<CardContent>
 							<div class="text-2xl font-bold">
-								12,234
+								{{ props.monthlySchedules }}
 							</div>
 						</CardContent>
 					</Card>

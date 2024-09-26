@@ -38,7 +38,6 @@ const selectGuardian = (guardian: Guardian) => {
 }
 
 watch(cpfBoundObject, async (newSearchCpf) => {
-	console.log(newSearchCpf['unmasked'])
 	if (newSearchCpf['unmasked'].length < 3) return guardians.value = []
 
 	await searchGuardian(newSearchCpf['unmasked'])
@@ -69,7 +68,7 @@ watch(cpfBoundObject, async (newSearchCpf) => {
 							<FormItem>
 								<FormLabel>Busque pelo CPF</FormLabel>
 								<FormControl>
-									<Input type="text" v-maska="cpfBoundObject" inputmode="numeric" data-maska="###.###.###-##" placeholder="CPF"
+									<Input type="text" @keydown.enter.prevent v-maska="cpfBoundObject" inputmode="numeric" data-maska="###.###.###-##" placeholder="CPF"
 										   v-bind="componentField" v-model="maskedSearchCpf" key="search_cpf"/>
 								</FormControl>
 								<div class="flex items-center gap-1">

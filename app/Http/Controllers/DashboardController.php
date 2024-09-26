@@ -11,7 +11,8 @@ class DashboardController extends Controller {
         return inertia('Dashboard', [
             'chartData' => DashboardHelper::getSchedulesChartArray(),
             'projection' => DashboardHelper::getSchedulesMonthlyProjection(),
-            'newCustomers' => DashboardHelper::getMonthlyNewCustomers()
+            'newCustomers' => DashboardHelper::getMonthlyNewCustomers(),
+            'monthlySchedules' => DashboardHelper::getMonthlySchedules()
         ]);
     }
 }

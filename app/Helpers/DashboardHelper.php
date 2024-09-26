@@ -25,7 +25,8 @@ class DashboardHelper {
         ")
             ->join('services', 'schedules.service_id', '=', 'services.id')
             ->join('teams', 'services.team_id', '=', 'teams.id')
-            ->where('schedules.status', 'finalizado')
+            ->where('schedules.status', '<>', 'cancelado')
+            ->where('schedules.status', '<>', 'faltou')
             ->where('schedules.active', true)
             ->where('schedules.start_date', '>=', now()->subMonths(12))
             ->groupBy('month', 'month_number', 'team')
@@ -56,6 +57,7 @@ class DashboardHelper {
             ->where(['active' => true])
             ->where('status', '<>', 'cancelado')
             ->where('status', '<>', 'faltou')
+            ->whereMonth('start_date', Carbon::today()->month)
             ->get();
 
         foreach ($schedules as $schedule) {
@@ -65,7 +67,15 @@ class DashboardHelper {
         return $projectionValue;
     }
 
-    public static function getMonthlyNewCustomers() {
+    public static function getMonthlyNewCustomers(): int {
         return Customer::where('active', true)->whereMonth('created_at', Carbon::today()->month)->count();
+    }
+
+    public static function getMonthlySchedules(): int {
+        return Schedule::where('schedules.status', '<>', 'cancelado')
+            ->where('schedules.status', '<>', 'faltou')
+            ->where('schedules.active', true)
+            ->whereMonth('start_date', Carbon::today()->month)
+            ->count();
     }
 }
