@@ -13,8 +13,9 @@ class Kernel extends ConsoleKernel {
         // $schedule->command('inspire')->hourly();
 
         $schedule
-            ->command('app:create-schedules-recurrence')
-            ->everyTenSeconds()
+            ->command('schedule:generate-future-recurrence')
+            ->cron('0 0 * * *')
+            ->evenInMaintenanceMode()
             ->timezone('America/Sao_Paulo');
     }
 

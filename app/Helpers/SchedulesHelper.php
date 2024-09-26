@@ -19,42 +19,48 @@ class SchedulesHelper {
      * @throws \Exception
      */
     public static function verifySchedulesConflict(mixed $item, Schedule|null $schedule = null): void {
-        $hasRecurrence = ($item['hasRecurrence']);
+        $hasRecurrence = $item['hasRecurrence'];
         $service = Service::find($item['service_id']);
+        $startDate = Carbon::parse($item['start_date'])->setTimezone('America/Sao_Paulo');
+        $endDate = $startDate->copy()->addMinutes($service->duration);
 
         if (!$hasRecurrence) {
-            $startDate = Carbon::createFromDate($item['start_date'])->setTimezone('America/Sao_Paulo');
-            $endDate = Carbon::createFromDate($item['start_date'])->addMinutes($service->duration)->setTimezone('America/Sao_Paulo');
             self::checkValidScheduleDate($startDate, $endDate, $service->id, $schedule);
             return;
         }
 
         $arrSchedule = [];
         $loopCount = 0;
+
         if ($schedule) {
             $arrSchedule = Schedule::where(['recurrence_id' => $schedule->recurrence_id, 'active' => true])
                 ->whereNotNull('recurrence_id')
                 ->orderBy('start_date')
                 ->get();
-
             $loopCount = count($arrSchedule);
         }
 
+        // Definir o loop com base no número de semanas até o limite da recorrência
         if ($loopCount < 2) {
-            $loopCount = 5;
+            $loopCount = self::getWeeksUntilLimit($item['start_date']);
         }
 
-        $i = 0;
-        while ($i < $loopCount) {
-            $startDate = Carbon::createFromDate($item['start_date'])->addWeeks($i)->setTimezone('America/Sao_Paulo');
-            $endDate = Carbon::createFromDate($item['start_date'])->addMinutes($service->duration)->addWeeks($i)->setTimezone('America/Sao_Paulo');
+        for ($i = 0; $i < $loopCount; $i++) {
+            $startDate = Carbon::parse($item['start_date'])->addWeeks($i)->setTimezone('America/Sao_Paulo');
+            $endDate = $startDate->copy()->addMinutes($service->duration);
+            $itemSchedule = $arrSchedule[$i] ?? null;
 
-            $itemSchedule = isset($arrSchedule[$i]) ? $arrSchedule[$i] : null;
             self::checkValidScheduleDate($startDate, $endDate, $service->id, $itemSchedule);
-
-            $i++;
         }
-        return;
+    }
+
+    /**
+     * Verifica quantas semanas até o limite de dois meses à frente.
+     */
+    private static function getWeeksUntilLimit(string $startDate): int {
+        $start = Carbon::parse($startDate);
+        $limitDate = Carbon::now()->addMonths(2)->endOfWeek();
+        return $start->diffInWeeks($limitDate);
     }
 
     /**
@@ -62,28 +68,23 @@ class SchedulesHelper {
      */
     public static function checkValidScheduleDate(Carbon $startDate, Carbon $endDate, int $serviceId, Schedule|null $schedule = null): void {
         $scheduleId = $schedule?->id;
-
         $conflictingSchedules = Schedule::where(['service_id' => $serviceId, 'active' => true])
             ->where('id', '!=', $scheduleId)
             ->where(function ($query) use ($schedule) {
                 if ($schedule) {
                     $query->where('recurrence_id', '!=', $schedule->recurrence_id)
-                        ->orWhereNull('recurrence_id');
+                          ->orWhereNull('recurrence_id');
                 }
             })
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->where(function ($query) use ($startDate, $endDate) {
                     $query->whereBetween('start_date', [$startDate, $endDate])
-                        ->orWhereBetween('end_date', [$startDate, $endDate]);
+                          ->orWhereBetween('end_date', [$startDate, $endDate]);
                 })
                 ->orWhere(function ($query) use ($startDate, $endDate) {
                     $query->where('start_date', '<', $startDate)
-                        ->where('end_date', '>', $endDate);
+                          ->where('end_date', '>', $endDate);
                 });
-            })
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->where('end_date', '!=', $startDate)
-                    ->where('start_date', '!=', $endDate);
             })
             ->exists();
 
@@ -95,70 +96,102 @@ class SchedulesHelper {
     /**
      * @throws \Exception
      */
-    public static function generateFutureSchedulesRecurrence(Schedule|null $schedule = null, int|null $mainRecurrenceScheduleId = null): void {
-        $schedules = [];
-        if (!$schedule) {
-            $schedules = Schedule::distinct()
-                ->where(['active' => true])
-                ->whereNotNull('recurrence_id')
-                ->orderBy('end_date', 'desc')
-                ->get()
-                ->groupBy('recurrence_id');
-        } else {
-            $schedules[] = $schedule;
+    public static function generateFutureSchedulesRecurrence(Schedule|null $schedule = null, int|null $mainRecurrenceScheduleId = null, string|null $recurrenceString = null): void {
+        $currentDate = Carbon::now();
+        $limitDate = $currentDate->copy()->startOfMonth()->addMonths(2)->endOfWeek();
+
+        // Buscar agendamentos com recorrência
+        $schedules = $schedule ? collect([$schedule]) : self::getActiveRecurringSchedules();
+
+        foreach ($schedules as $scheduleGroup) {
+            $lastScheduleDate = self::getLastScheduleDate($scheduleGroup);
+            $nextScheduleIndex = 1;
+            $recurrenceId = $recurrenceString ?? $scheduleGroup->recurrence_id;
+
+            self::generateSchedulesUntilLimit($scheduleGroup, $lastScheduleDate, $limitDate, $mainRecurrenceScheduleId, $nextScheduleIndex, $recurrenceId);
         }
+    }
 
-        $i = 1;
-        while ($i <= 4) {
-            foreach ($schedules as $item) {
-                self::createSchedule($item, true, $i, $mainRecurrenceScheduleId);
-            }
+    private static function getActiveRecurringSchedules(): \Illuminate\Support\Collection {
+        return Schedule::where('active', true)
+            ->whereNotNull('recurrence_id')
+            ->orderBy('end_date', 'desc')
+            ->get()
+            ->unique('recurrence_id');
+    }
 
-            $i++;
+    private static function getLastScheduleDate($scheduleGroup) {
+        return $scheduleGroup->max('end_date');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private static function generateSchedulesUntilLimit($scheduleGroup, $lastScheduleDate, $limitDate, $mainRecurrenceScheduleId, $index, string|null $recurrenceString = null): void {
+        $nextScheduleDate = Carbon::createFromDate($scheduleGroup->start_date)->copy()->addWeek();
+
+        while ($nextScheduleDate->lessThanOrEqualTo($limitDate)) {
+            self::createSchedule($scheduleGroup, true, $index, $mainRecurrenceScheduleId, $recurrenceString);
+            $nextScheduleDate->addWeek();
+            $index++;
         }
     }
 
     /**
      * @throws \Exception
      */
-    public static function createSchedule(mixed $item, bool $fromRecurrenceFunc = false, int|null $index = null, int|null $mainRecurrenceScheduleId = null): void {
+    public static function createSchedule(mixed $item, bool $fromRecurrenceFunc = false, int|null $index = null, int|null $mainRecurrenceScheduleId = null, string|null $recurrenceString = null): void {
         $customer = Customer::find($item['customer_id']);
         $service = Service::find($item['service_id']);
-        $mainRecurrenceId = $mainRecurrenceScheduleId;
 
         if ($fromRecurrenceFunc) {
-            $startDate = Carbon::createFromDate($item['start_date'])->addWeeks($index);
-            $endDate = Carbon::createFromDate($item['end_date'])->addWeeks($index);
-            $recurrenceId = $item['recurrence_id'];
+            $startDate = Carbon::parse($item['start_date'])->addWeeks($index);
+            $endDate = Carbon::parse($item['end_date'])->addWeeks($index);
         } else {
-            $startDate = Carbon::createFromDate($item['start_date']);
-            $endDate = Carbon::createFromDate($item['start_date'])->addMinutes($service->duration);
+            $startDate = Carbon::parse($item['start_date']);
+            $endDate = $startDate->copy()->addMinutes($service->duration);
             self::verifySchedulesConflict($item);
         }
 
-        $recurrenceEvent = new Event();
-        $recurrenceEvent->name = "Agendamento " . $customer->name;
-        $recurrenceEvent->startDateTime = $startDate;
-        $recurrenceEvent->endDateTime = $endDate;
-        $recurrenceEvent->setColorId(ScheduleStatusColor::PENDENTE->value);
-
-        $recurrenceSchedule = new Schedule();
-        $recurrenceSchedule->customer_id = $item['customer_id'];
-        $recurrenceSchedule->service_id = $item['service_id'];
-        $recurrenceSchedule->start_date = $startDate->setTimezone('America/Sao_Paulo');
-        $recurrenceSchedule->end_date = $endDate->setTimezone('America/Sao_Paulo');
-        $recurrenceSchedule->status = ScheduleStatus::PENDENTE;
-        $recurrenceSchedule->save();
-
-        if (!$mainRecurrenceId && !$fromRecurrenceFunc && $item['hasRecurrence']) {
-            $mainRecurrenceId = $recurrenceSchedule->id;
+        if (!$mainRecurrenceScheduleId && !$fromRecurrenceFunc && $item['hasRecurrence']) {
+            $recurrenceString = "PLACEHOLDER_" . uniqid();
         }
 
-        CreateEvent::dispatchAfterResponse($recurrenceEvent, $recurrenceSchedule, $mainRecurrenceId);
+        $recurrenceEvent = self::createEvent($customer->name, $startDate, $endDate);
+        $recurrenceSchedule = self::createScheduleRecord($item['customer_id'], $item['service_id'], $startDate, $endDate, $recurrenceString);
+
+        if (!$mainRecurrenceScheduleId && !$fromRecurrenceFunc && $item['hasRecurrence']) {
+            $mainRecurrenceScheduleId = $recurrenceSchedule->id;
+        }
+
+        CreateEvent::dispatchAfterResponse($recurrenceEvent, $recurrenceSchedule, $mainRecurrenceScheduleId);
 
         if (!$fromRecurrenceFunc && $item['hasRecurrence']) {
-            self::generateFutureSchedulesRecurrence($recurrenceSchedule, $mainRecurrenceId);
+            self::generateFutureSchedulesRecurrence($recurrenceSchedule, $mainRecurrenceScheduleId, $recurrenceString);
         }
+    }
+
+    private static function createEvent(string $customerName, Carbon $startDate, Carbon $endDate): Event {
+        $event = new Event();
+        $event->name = "Agendamento " . $customerName;
+        $event->startDateTime = $startDate;
+        $event->endDateTime = $endDate;
+        $event->setColorId(ScheduleStatusColor::PENDENTE->value);
+
+        return $event;
+    }
+
+    private static function createScheduleRecord(int $customerId, int $serviceId, Carbon $startDate, Carbon $endDate, string|null $recurrenceString = null): Schedule {
+        $schedule = new Schedule();
+        $schedule->customer_id = $customerId;
+        $schedule->service_id = $serviceId;
+        $schedule->start_date = $startDate->setTimezone('America/Sao_Paulo');
+        $schedule->end_date = $endDate->setTimezone('America/Sao_Paulo');
+        $schedule->recurrence_id = $recurrenceString;
+        $schedule->status = ScheduleStatus::PENDENTE;
+        $schedule->save();
+
+        return $schedule;
     }
 
     /**
@@ -274,12 +307,24 @@ class SchedulesHelper {
     public static function filterSchedules(mixed $filterOptions): \Illuminate\Http\Resources\Json\AnonymousResourceCollection {
         $scheduleQuery = Schedule::with(['customer', 'service']);
 
-        if (isset($filterOptions['scheduleDate'])) $scheduleQuery->whereDate('start_date', Carbon::createFromDate($filterOptions['scheduleDate']));
-        if (isset($filterOptions['month'])) $scheduleQuery->whereMonth('start_date', $filterOptions['month']);
-        if (isset($filterOptions['year'])) $scheduleQuery->whereYear('start_date', $filterOptions['year']);
-        if (isset($filterOptions['customerId'])) $scheduleQuery->where('customer_id', $filterOptions['customerId']);
-        if (isset($filterOptions['serviceId'])) $scheduleQuery->where('service_id', $filterOptions['serviceId']);
-        if (isset($filterOptions['status'])) $scheduleQuery->where('status', $filterOptions['status']);
+        if (isset($filterOptions['scheduleDate'])) {
+            $scheduleQuery->whereDate('start_date', Carbon::createFromDate($filterOptions['scheduleDate']));
+        }
+        if (isset($filterOptions['month'])) {
+            $scheduleQuery->whereMonth('start_date', $filterOptions['month']);
+        }
+        if (isset($filterOptions['year'])) {
+            $scheduleQuery->whereYear('start_date', $filterOptions['year']);
+        }
+        if (isset($filterOptions['customerId'])) {
+            $scheduleQuery->where('customer_id', $filterOptions['customerId']);
+        }
+        if (isset($filterOptions['serviceId'])) {
+            $scheduleQuery->where('service_id', $filterOptions['serviceId']);
+        }
+        if (isset($filterOptions['status'])) {
+            $scheduleQuery->where('status', $filterOptions['status']);
+        }
 
         $scheduleQuery->where(['active' => true]);
 
